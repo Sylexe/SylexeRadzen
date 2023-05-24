@@ -1,0 +1,122 @@
+﻿@page "/counter"
+@using System 
+@using System.IO
+@using System.Diagnostics
+@using System.ComponentModel
+@using Microsoft.AspNetCore.Hosting
+@using Microsoft.Extensions.Logging
+@using SylexeRadzen.SQLManagement.Services;
+@inject ILogger<Counter> Logger
+@inject IWebHostEnvironment WebEnvironment
+@inject ISylexeReportsServices _sylexeService
+
+<PageTitle>Counter</PageTitle>
+
+<input @bind-value="@docker.Name" @bind-value:event="oninput" />
+<input @bind-value="@pathForDocker" @bind-value:event="oninput" />
+<h3>@docker.Name</h3>
+
+<p>
+    <label>
+        Max file size:
+        <input type="number" @bind="maxFileSize" />
+    </label>
+</p>
+
+<p>
+    <label>
+        Max allowed files:
+        <input type="number" @bind="maxAllowedFiles" />
+    </label>
+</p>
+
+<p>
+    <label>
+        Upload up to @maxAllowedFiles of up to @maxFileSize bytes:
+        <InputFile OnChange="@LoadFiles" multiple />
+    </label>
+</p>
+
+<button @onclick="@(() => ExecTrivyScan(docker.Name))">Execute Scan</button>
+
+
+@if (isLoading)
+{
+        <p>Uploading...</p>
+}
+else
+{
+        <ul>
+        @foreach (var file in loadedFiles)
+        {
+                    <li>
+                        <ul>
+                            <li>Name: @file.Name</li>
+                            <li>Last modified: @file.LastModified.ToString()</li>
+                            <li>Size (bytes): @file.Size</li>
+                            <li>Content type: @file.ContentType</li>
+                        </ul>
+                    </li>
+        }
+        </ul>
+}
+
+@code {
+    private List<IBrowserFile> loadedFiles = new();
+    private long maxFileSize = 1024 * 15;
+    private int maxAllowedFiles = 3;
+    private bool isLoading;
+    public string pathForDocker = "";
+    public class Docker
+    {
+        public string Name { get; set; }
+    }
+
+    public Docker docker = new()
+        {
+            Name = "aquasec/trivy:0.34.0"
+        };
+
+    private async Task LoadFiles(InputFileChangeEventArgs e)
+    {
+        isLoading = true;
+        loadedFiles.Clear();
+
+        foreach (var file in e.GetMultipleFiles(maxAllowedFiles))
+        {
+            try
+            {
+                loadedFiles.Add(file);
+
+                var trustedFileNameForFileStorage = Path.GetRandomFileName();
+                var path = Path.Combine(WebEnvironment.ContentRootPath,
+                        WebEnvironment.EnvironmentName, "unsafe_uploads",
+                        trustedFileNameForFileStorage);
+
+                await using FileStream fs = new(path, FileMode.Create);
+                await file.OpenReadStream(maxFileSize).CopyToAsync(fs);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError("File: {Filename} Error: {Error}",
+                    file.Name, ex.Message);
+            }
+        }
+
+        isLoading = false;
+    }
+
+    void ExecTrivyScan(string DockerScan)
+    {
+        Process serverSideProcess = new Process();
+        //docker run -v C: \Users\lesgu\result:/ result aquasec / trivy:0.34.0 - d image - f json - o / result / rat.json aquasec / trivy:0.34.0
+        serverSideProcess.StartInfo.FileName = Environment.GetEnvironmentVariable("docker");
+        serverSideProcess.StartInfo.FileName = @"C:\Program Files\Docker\Docker\resources\bin\docker.exe";
+        var path = Path.Combine(WebEnvironment.ContentRootPath, WebEnvironment.EnvironmentName);
+        serverSideProcess.StartInfo.Arguments = String.Format("run -v {0}:/result aquasec/trivy:0.34.0 -d image -f json -o /result/rat.json {1}", pathForDocker, DockerScan);
+        serverSideProcess.EnableRaisingEvents = true;
+        serverSideProcess.StartInfo.UseShellExecute = true;
+        serverSideProcess.Start();
+    }
+
+}

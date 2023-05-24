@@ -1,0 +1,178 @@
+﻿@page "/fetchdata"
+@inject HttpClient Http
+@inject IWebHostEnvironment Environment
+@inject IJSRuntime JS
+@using System.Runtime.Serialization.Json;
+@using System.Text.Json;
+
+@if (metadata == null)
+{
+    <p>Chargement...</p>
+}
+else
+{
+    <p>Employee ID: @metadata.SchemaVersion</p>
+    <p>OS: @metadata.Metadata.OS.Name</p>
+    <p></p>
+    <button @onclick="DownloadJsonFile">Export to JSON</button>
+}
+
+
+@code {
+
+    private async Task DownloadJsonFile()
+    {
+        var fileName = "rat.json";
+        var path = Path.Combine(Environment.ContentRootPath, Environment.EnvironmentName, fileName);
+
+        await using FileStream fs = new(path, FileMode.Open);
+
+        using var streamRef = new DotNetStreamReference(stream: fs);
+
+        await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+    }
+
+    private MetadataJson metadata;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var fileName = "rat.json";
+        var path = Path.Combine(Environment.ContentRootPath, Environment.EnvironmentName, fileName);
+
+        await using FileStream fs = new(path, FileMode.Open);
+
+        StreamReader reader = new StreamReader(fs);
+        string fileContent = await reader.ReadToEndAsync();
+        metadata = JsonSerializer.Deserialize<MetadataJson>(fileContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+    }
+
+
+    public class MetadataJson
+    {
+        public int SchemaVersion { get; set; }
+        public string ArtifactName { get; set; }
+        public string ArtifactType { get; set; }
+        public Metadata Metadata { get; set; }
+
+    }
+
+    public class Metadata
+    {
+        public OS OS { get; set; }
+        public string ImageID { get; set; }
+        public string[] DiffIDs { get; set; }
+        public string[] RepoTags { get; set; }
+        public string[] RepoDigests { get; set; }
+        public ImageConfig ImageConfig { get; set; }
+        public List<Results> Results { get; set; }
+    }
+
+    public class OS
+    {
+        public string Family { get; set; }
+        public string Name { get; set; }
+    }
+
+    public class ImageConfig
+    {
+        public string architecture { get; set; }
+        public string created { get; set; }
+        public History[] history { get; set; }
+        public string os { get; set; }
+        public Rootfs rootfs { get; set; }
+        public Config config { get; set; }
+    }
+
+    public class History
+    {
+        public string created { get; set; }
+        public string created_by { get; set; }
+        public bool empty_layer { get; set; }
+        public string comment { get; set; }
+    }
+
+    public class Rootfs
+    {
+        public string type { get; set; }
+        public string[] diff_ids { get; set; }
+    }
+
+    public class Config
+    {
+        public string[] Entrypoint { get; set; }
+        public string[] Env { get; set; }
+        public Labels Labels { get; set; }
+    }
+
+    public class Labels
+    {
+        public string org_opencontainers_image_created { get; set; }
+        public string org_opencontainers_image_description { get; set; }
+        public string org_opencontainers_image_documentation { get; set; }
+        public string org_opencontainers_image_revision { get; set; }
+        public string org_opencontainers_image_source { get; set; }
+        public string org_opencontainers_image_title { get; set; }
+        public string org_opencontainers_image_url { get; set; }
+    }
+
+    public class Results
+    {
+        public String Target { get; set; }
+        public String Class { get; set; }
+        public String Type { get; set; }
+        public List<Vulnerabilities> Vulnerabilities { get; set; }
+    }
+
+    public class Vulnerabilities
+    {
+        public String VulnerabilityID { get; set; }
+        public String PkgName { get; set; }
+        public String InstalledVersion { get; set; }
+        public Layer Layer { get; set; }
+        public String SeveritySource { get; set; }
+        public String PrimarySource { get; set; }
+        public DataSource DataSource { get; set; }
+        public String Title { get; set; }
+        public String Description { get; set; }
+        public String Severity { get; set; }
+        public String[] CweIDs { get; set; }
+        public CVSS CVSS { get; set; }
+        public String[] References { get; set; }
+        public String PublishedDate { get; set; }
+        public String LastModifiedDate { get; set; }
+    }
+
+    public class Layer
+    {
+        public String Digest { get; set; }
+        public String DiffID { get; set; }
+    }
+
+    public class DataSource
+    {
+        public String ID { get; set; }
+        public String Name { get; set; }
+        public String URL { get; set; }
+    }
+
+    public class CVSS
+    {
+        public nvd nvd { get; set; }
+        public redhat redhat { get; set; }
+    }
+
+    public class nvd
+    {
+        public String V2Vector { get; set; }
+        public String V3Vector { get; set; }
+        public float V2Score { get; set; }
+        public float V3Score { get; set; }
+    }
+
+    public class redhat
+    {
+        public String V3Vector { get; set; }
+        public float V3Score { get; set; }
+    }
+
+}
