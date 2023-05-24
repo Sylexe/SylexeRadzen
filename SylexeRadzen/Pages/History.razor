@@ -1,0 +1,13 @@
+﻿@page "/history"
+@using System 
+@using System.IO
+@using System.Diagnostics
+@using System.ComponentModel
+@using Microsoft.AspNetCore.Hosting
+@using Microsoft.Extensions.Logging
+@using SylexeRadzen.SQLManagement.Services;
+@inject ILogger<History> Logger
+@inject IWebHostEnvironment WebEnvironment
+@inject ISylexeReportsServices _sylexeService
+
+<PageTitle>History</PageTitle>
