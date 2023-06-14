@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
+using Radzen;
 using SylexeRadzen.SQLManagement.Context;
 using SylexeRadzen.SQLManagement.Services;
 
@@ -15,6 +16,8 @@ builder.Services.AddDbContext<SylexeDB>(optionsBuilder =>
 {
     optionsBuilder.UseSqlite("Data Source = Dev_Sylexe.db");
 });
+
+builder.Services.AddScoped<NotificationService>();
 
 var app = builder.Build();
 
