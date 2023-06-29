@@ -9,36 +9,61 @@
 @inject ILogger<Counter> Logger
 @inject IWebHostEnvironment WebEnvironment
 @inject ISylexeReportsServices _sylexeService
+@inject NotificationService NotificationService
 
-<PageTitle>Counter</PageTitle>
+<PageTitle>Analyse</PageTitle>
 
-<input @bind-value="@docker.Name" @bind-value:event="oninput" />
-<input @bind-value="@pathForDocker" @bind-value:event="oninput" />
-<h3>@docker.Name</h3>
+//Logo TRIVY
 
-<p>
-    <label>
-        Max file size:
-        <input type="number" @bind="maxFileSize" />
-    </label>
-</p>
 
-<p>
-    <label>
-        Max allowed files:
-        <input type="number" @bind="maxAllowedFiles" />
-    </label>
-</p>
 
-<p>
-    <label>
-        Upload up to @maxAllowedFiles of up to @maxFileSize bytes:
-        <InputFile OnChange="@LoadFiles" multiple />
-    </label>
-</p>
-
-<button @onclick="@(() => ExecTrivyScan(docker.Name))">Execute Scan</button>
-
+<RadzenStack Orientation="@orientation" Gap="@gap" Reverse="@reverse" JustifyContent="@justifyContent" AlignItems="@alignItems" Style="height: 350px">
+    <RadzenRow Style="background-color:#D7DBE0;padding: 10px;border-radius: 10px;width: 50%">
+        <RadzenColumn Style="text-align: center">
+            Nom conteneur docker
+        </RadzenColumn>
+        <RadzenColumn Style="text-align: center">
+            Chemin du docker
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow Style="background-color:#D7DBE0;padding: 10px;margin-top: -25px;border-radius: 10px;width: 50%">
+        <RadzenColumn Style="text-align: center">
+            <input type="text" @bind-value="@docker.Name" @bind-value:event="oninput" readonly="true"/>
+        </RadzenColumn>
+        <RadzenColumn Style="text-align: center">
+            <input type="text" @bind-value="@pathForDocker" @bind-value:event="oninput" readonly="true"/>
+        </RadzenColumn>
+    </RadzenRow>
+    
+    <RadzenRow Style="background-color:#D7DBE0;padding: 10px;border-radius: 10px;width: 50%">
+        <RadzenColumn Style="text-align: center;">
+            Taille fichier max
+        </RadzenColumn>
+        <RadzenColumn Style="text-align: center">
+            Nombre max de fichiers acceptés
+        </RadzenColumn>
+        </RadzenRow>
+    <RadzenRow Style="background-color:#D7DBE0;padding: 10px;margin-top: -25px;border-radius: 10px;width: 50%">
+        <RadzenColumn Style="text-align: center">
+            <input type="number" @bind="maxFileSize" max-length="5" readonly="true"/>
+        </RadzenColumn>
+        <RadzenColumn Style="text-align: center">
+            <input type="number" @bind="maxAllowedFiles" max-length="1" readonly="true"/>
+        </RadzenColumn>
+    </RadzenRow>
+    
+    <RadzenRow Style="background-color:#D7DBE0;padding: 10px;border-radius: 10px;width: 21%">
+        <RadzenColumn Style="text-align: center">
+            <InputFile OnChange="@LoadFiles" multiple />
+        </RadzenColumn>
+    </RadzenRow>
+    
+    <RadzenRow Style="background-color:transparent;padding: 10px;border-radius: 10px;width: 50%">
+        <RadzenColumn Style="text-align: center">
+            <RadzenButton Shade="Shade.Darker" Click=@(args => ExecTrivyScan(docker.Name)) Text="Execute Scan" ButtonStyle="ButtonStyle.Secondary" />
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenStack>
 
 @if (isLoading)
 {
@@ -117,6 +142,17 @@ else
         serverSideProcess.EnableRaisingEvents = true;
         serverSideProcess.StartInfo.UseShellExecute = true;
         serverSideProcess.Start();
+    }
+    
+    Orientation orientation = Orientation.Vertical;
+    AlignItems alignItems = AlignItems.Center;
+    JustifyContent justifyContent = JustifyContent.Center;
+    FlexWrap wrap = FlexWrap.NoWrap;
+    string gap = "10px";
+    bool reverse;
+    private void OnClick(string text)
+    {
+        NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Info, Summary = "Button Clicked", Detail = text });
     }
 
 }
