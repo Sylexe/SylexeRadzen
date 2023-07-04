@@ -13,20 +13,26 @@
 
 <PageTitle>Analyse</PageTitle>
 
-<RadzenStack Orientation="@orientation" Gap="@gap" Reverse="@reverse" JustifyContent="@justifyContent" AlignItems="@alignItems" Style="height: 70%">
-    
-    <RadzenRow>
-        <RadzenColumn Style="text-align: center">
+<!--Faire des RadzenStack dans des Radzen card et mettre le texte dans un radzenCard-->
+
+<RadzenCard class="p-0">
+    <RadzenStack Orientation="@orientation" Gap="@gap" Reverse="@reverse" JustifyContent="@justifyContent" AlignItems="@alignItems" Style="height: 550px">
+        <RadzenCard class="p-1 rz-background-color-info rz-color-on-info rz-text-align-center ma-16" style="height: 80%; width: 40%;">
             Nom Docker
-        </RadzenColumn>
-    </RadzenRow>
-   
-    
-    <div>
-        <h2 style="border-color: #0a53be;border-radius: 10px">OU</h2>
-        <hr style="clear:both;position: absolute;margin-top: 10px;margin-left: 22px;height: 87%;width: 5px;background: black;"/>
-    </div>
-</RadzenStack>
+        </RadzenCard>
+        <RadzenCard class="p-1 rz-color-on-warning rz-black rz-text-align-center" style="height: 80%; width: 5%;">
+            <RadzenCard class="p-1 rz-background-color-success rz-color-on-success rz-text-align-center" style="height: 10%; width: 100%;">
+                <h2 style="border-color: #0a53be;border-radius: 10px">OU</h2>
+            </RadzenCard>
+            <RadzenCard class="p-1 rz-background-color-success rz-color-on-success rz-text-align-center" style="height: 90%; width: 100%;">
+                                
+            </RadzenCard>
+        </RadzenCard>
+        <RadzenCard class="p-1 rz-background-color-warning rz-color-on-warning rz-text-align-center" style="height: 80%; width: 40%;">
+            C
+        </RadzenCard>
+    </RadzenStack>
+</RadzenCard>
 
 @if (isLoading)
 {
@@ -107,7 +113,8 @@ else
         serverSideProcess.Start();
     }
     
-    Orientation orientation = Orientation.Vertical;
+    Orientation orientation = Orientation.Horizontal;
+    Orientation orientation2 = Orientation.Vertical;
     AlignItems alignItems = AlignItems.Center;
     JustifyContent justifyContent = JustifyContent.Center;
     FlexWrap wrap = FlexWrap.NoWrap;
