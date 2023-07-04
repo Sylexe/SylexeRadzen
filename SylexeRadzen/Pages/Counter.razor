@@ -6,9 +6,12 @@
 @using Microsoft.AspNetCore.Hosting
 @using Microsoft.Extensions.Logging
 @using SylexeRadzen.SQLManagement.Services;
+@using SylexeRadzen.SQLManagement.Context;
+@using SylexeRadzen.SQLManagement.Definitions;
 @inject ILogger<Counter> Logger
 @inject IWebHostEnvironment WebEnvironment
 @inject ISylexeReportsServices _sylexeService
+@inject IJSRuntime JsRuntime
 
 <PageTitle>Counter</PageTitle>
 
@@ -117,6 +120,13 @@ else
         serverSideProcess.EnableRaisingEvents = true;
         serverSideProcess.StartInfo.UseShellExecute = true;
         serverSideProcess.Start();
+        var date = new DateOnly().ToString();
+        _sylexeService.AddCategoriesAsync(new SylexeReports
+            {
+                Id = 1,
+                Name = DockerScan,
+                Timestamp = date
+            });
     }
 
 }
