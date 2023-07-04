@@ -1,4 +1,5 @@
 ﻿@page "/counter"
+@inject IJSRuntime JsRuntime
 @using System 
 @using System.IO
 @using System.Diagnostics
@@ -6,6 +7,8 @@
 @using Microsoft.AspNetCore.Hosting
 @using Microsoft.Extensions.Logging
 @using SylexeRadzen.SQLManagement.Services;
+@using SylexeRadzen.SQLManagement.Context;
+@using SylexeRadzen.SQLManagement.Definitions;
 @inject ILogger<Counter> Logger
 @inject IWebHostEnvironment WebEnvironment
 @inject ISylexeReportsServices _sylexeService
@@ -33,6 +36,33 @@
         </RadzenCard>
     </RadzenStack>
 </RadzenCard>
+
+<!--<input @bind-value="@docker.Name" @bind-value:event="oninput" />
+<input @bind-value="@pathForDocker" @bind-value:event="oninput" />
+
+<p>
+    <label>
+        Max file size:
+        <input type="number" @bind="maxFileSize" />
+    </label>
+</p>
+
+<p>
+    <label>
+        Max allowed files:
+        <input type="number" @bind="maxAllowedFiles" />
+    </label>
+</p>
+
+<p>
+    <label>
+        Upload up to @maxAllowedFiles of up to @maxFileSize bytes:
+        <InputFile OnChange="@LoadFiles" multiple />
+    </label>
+</p>
+
+<button @onclick="@(() => ExecTrivyScan(docker.Name))">Execute Scan</button>-->
+
 
 @if (isLoading)
 {
@@ -111,6 +141,13 @@ else
         serverSideProcess.EnableRaisingEvents = true;
         serverSideProcess.StartInfo.UseShellExecute = true;
         serverSideProcess.Start();
+        var date = new DateOnly().ToString();
+        _sylexeService.AddCategoriesAsync(new SylexeReports
+            {
+                Id = 1,
+                Name = DockerScan,
+                Timestamp = date
+            });
     }
     
     Orientation orientation = Orientation.Horizontal;
