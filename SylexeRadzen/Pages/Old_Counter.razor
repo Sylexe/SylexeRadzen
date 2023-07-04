@@ -1,4 +1,4 @@
-﻿@page "/counter"
+﻿@page "/old_counter"
 @using System 
 @using System.IO
 @using System.Diagnostics
@@ -13,19 +13,57 @@
 
 <PageTitle>Analyse</PageTitle>
 
-<RadzenStack Orientation="@orientation" Gap="@gap" Reverse="@reverse" JustifyContent="@justifyContent" AlignItems="@alignItems" Style="height: 70%">
-    
-    <RadzenRow>
+<RadzenStack Orientation="@orientation" Gap="@gap" Reverse="@reverse" JustifyContent="@justifyContent" AlignItems="@alignItems" Style="height: 350px">
+    <RadzenRow Style="">
         <RadzenColumn Style="text-align: center">
-            Nom Docker
+            <h1>TRIVY</h1>
         </RadzenColumn>
     </RadzenRow>
-   
+    <RadzenRow Style="background-color:#D7DBE0;padding: 10px;border-radius: 10px;width: 50%">
+        <RadzenColumn Style="text-align: center">
+            Nom conteneur docker
+        </RadzenColumn>
+        <RadzenColumn Style="text-align: center">
+            Chemin du docker
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow Style="background-color:#D7DBE0;padding: 10px;margin-top: -25px;border-radius: 10px;width: 50%">
+        <RadzenColumn Style="text-align: center">
+            <input type="text" @bind-value="@docker.Name" @bind-value:event="oninput" readonly="true"/>
+        </RadzenColumn>
+        <RadzenColumn Style="text-align: center">
+            <input type="text" @bind-value="@pathForDocker" @bind-value:event="oninput" readonly="true"/>
+        </RadzenColumn>
+    </RadzenRow>
     
-    <div>
-        <h2 style="border-color: #0a53be;border-radius: 10px">OU</h2>
-        <hr style="clear:both;position: absolute;margin-top: 10px;margin-left: 22px;height: 87%;width: 5px;background: black;"/>
-    </div>
+    <RadzenRow Style="background-color:#D7DBE0;padding: 10px;border-radius: 10px;width: 50%">
+        <RadzenColumn Style="text-align: center;">
+            Taille fichier max
+        </RadzenColumn>
+        <RadzenColumn Style="text-align: center">
+            Nombre max de fichiers acceptés
+        </RadzenColumn>
+        </RadzenRow>
+    <RadzenRow Style="background-color:#D7DBE0;padding: 10px;margin-top: -25px;border-radius: 10px;width: 50%">
+        <RadzenColumn Style="text-align: center">
+            <input type="number" @bind="maxFileSize" max-length="5" readonly="true"/>
+        </RadzenColumn>
+        <RadzenColumn Style="text-align: center">
+            <input type="number" @bind="maxAllowedFiles" max-length="1" readonly="true"/>
+        </RadzenColumn>
+    </RadzenRow>
+    
+    <RadzenRow Style="background-color:#D7DBE0;padding: 10px;border-radius: 10px;width: 21%">
+        <RadzenColumn Style="text-align: center">
+            <InputFile OnChange="@LoadFiles" multiple />
+        </RadzenColumn>
+    </RadzenRow>
+    
+    <RadzenRow Style="background-color:transparent;padding: 10px;border-radius: 10px;width: 50%">
+        <RadzenColumn Style="text-align: center">
+            <RadzenButton Shade="Shade.Darker" Click=@(args => ExecTrivyScan(docker.Name)) Text="Execute Scan" ButtonStyle="ButtonStyle.Secondary" />
+        </RadzenColumn>
+    </RadzenRow>
 </RadzenStack>
 
 @if (isLoading)

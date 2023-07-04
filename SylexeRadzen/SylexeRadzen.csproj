@@ -24,4 +24,10 @@
       <Folder Include="Data\" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Content Update="Pages\Old_Counter.razor">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      </Content>
+    </ItemGroup>
+
 </Project>
