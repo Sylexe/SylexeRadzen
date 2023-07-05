@@ -16,23 +16,20 @@
 
 <PageTitle>Analyse</PageTitle>
 
-<!--Faire des RadzenStack dans des Radzen card et mettre le texte dans un radzenCard-->
-
 <RadzenCard class="p-0">
     <RadzenStack Orientation="@orientation" Gap="@gap" Reverse="@reverse" JustifyContent="@justifyContent" AlignItems="@alignItems" Style="height: 550px">
         <RadzenCard class="p-1 rz-background-color-info rz-color-on-info rz-text-align-center ma-16" style="height: 80%; width: 40%;">
-            Nom Docker
+            <RadzenText TextStyle="TextStyle.H4" class="rz-mt-5">Nom Docker</RadzenText>
+            <RadzenCard class="p-2 rz-background-color-primary-light rz-color-on-info rz-text-align-center" style="height: 40%; width: 90%;">
+                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Change on every input</RadzenText>
+                <RadzenTextBox class="w-100 rz-text-align-center rz-vertical-align-center" Style="width: 100%"/>
+            </RadzenCard>
         </RadzenCard>
-        <RadzenCard class="p-1 rz-color-on-warning rz-black rz-text-align-center" style="height: 80%; width: 5%;">
-            <RadzenCard class="p-1 rz-background-color-success rz-color-on-success rz-text-align-center" style="height: 10%; width: 100%;">
-                <h2 style="border-color: #0a53be;border-radius: 10px">OU</h2>
-            </RadzenCard>
-            <RadzenCard class="p-1 rz-background-color-success rz-color-on-success rz-text-align-center" style="height: 90%; width: 100%;">
-                                
-            </RadzenCard>
+        <RadzenCard class="p-1 rz-background-color-primary-light rz-border-radius-6 rz-black rz-text-align-center" style="height: 10%; width: 5%;">
+            <RadzenText TextStyle="TextStyle.H3">OU</RadzenText>
         </RadzenCard>
         <RadzenCard class="p-1 rz-background-color-warning rz-color-on-warning rz-text-align-center" style="height: 80%; width: 40%;">
-            C
+            <RadzenText TextStyle="TextStyle.H4" class="rz-mt-5">Sélectionner DockerFile</RadzenText>
         </RadzenCard>
     </RadzenStack>
 </RadzenCard>
@@ -149,7 +146,7 @@ else
                 Timestamp = date
             });
     }
-    
+
     Orientation orientation = Orientation.Horizontal;
     Orientation orientation2 = Orientation.Vertical;
     AlignItems alignItems = AlignItems.Center;
@@ -161,5 +158,4 @@ else
     {
         NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Info, Summary = "Button Clicked", Detail = text });
     }
-
 }
