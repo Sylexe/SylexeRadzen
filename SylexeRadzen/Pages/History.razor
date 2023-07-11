@@ -5,6 +5,8 @@
 @using System.ComponentModel
 @using Microsoft.AspNetCore.Hosting
 @using Microsoft.Extensions.Logging
+@using SylexeRadzen.SQLManagement.Definitions
+@using SylexeRadzen.SQLManagement.Context;
 @using SylexeRadzen.SQLManagement.Services;
 @inject ILogger<History> Logger
 @inject IWebHostEnvironment WebEnvironment
@@ -15,21 +17,25 @@
 
 <RadzenCard class="p-0">
     <RadzenStack Orientation="@orientation" Gap="@gap" Reverse="@reverse" JustifyContent="@justifyContent" AlignItems="@alignItems" Style="height: 350px">
-        <RadzenRow  Style="background-color:#D7DBE0;padding: 10px;border-radius: 10px;">
-            <RadzenColumn Style="">
-                <RadzenCard style="height: 80px; width: 200px;background-color:#577296;color:white;text-align:center;vertical-align:center;font-size: 25px">
-                    Nom
-                </RadzenCard>
-            </RadzenColumn>
-            <RadzenColumn Style="">
-                <RadzenCard style="height: 80px; width: 400px; background-color:#D7DBE0; color: white; text-align: center;vertical-align: center;font-size: 25px">
-                    Date
-                </RadzenCard>
-            </RadzenColumn>
-            <RadzenColumn>
-                <RadzenButton Click=@(args => OnClick("Primary button")) Text="+" ButtonStyle="ButtonStyle.Primary" Style="background-color:#375A8B;margin-top: 20px;font-size: 20px"/>
-            </RadzenColumn>
-        </RadzenRow>
+        
+        @foreach (var report  in reports)
+        {
+            <RadzenRow  Style="background-color:#D7DBE0;padding: 10px;border-radius: 10px;">
+                <RadzenColumn Style="">
+                    <RadzenCard style="height: 80px; width: 200px;background-color:#577296;color:white;text-align:center;vertical-align:center;font-size: 25px">
+                        @report.Name
+                    </RadzenCard>
+                </RadzenColumn>
+                <RadzenColumn Style="">
+                    <RadzenCard style="height: 80px; width: 400px; background-color:#D7DBE0; color: white; text-align: center;vertical-align: center;font-size: 25px">
+                        @report.Timestamp
+                    </RadzenCard>
+                </RadzenColumn>
+                <RadzenColumn>
+                    <RadzenButton Click=@(args => OnClick("Primary button")) Text="+" ButtonStyle="ButtonStyle.Primary" Style="background-color:#375A8B;margin-top: 20px;font-size: 20px"/>
+                </RadzenColumn>
+            </RadzenRow>
+        }
         <RadzenRow  Style="background-color:#D7DBE0;padding: 10px;border-radius: 10px;">
             <RadzenColumn Style="">
                 <RadzenCard style="height: 80px; width: 200px;background-color:#577296;color:black;text-align:center;vertical-align:center;font-size: 25px">
@@ -72,6 +78,13 @@
     FlexWrap wrap = FlexWrap.NoWrap;
     string gap = "10px";
     bool reverse;
+    List<SylexeReports> reports;
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        
+        reports = await _sylexeService.GetCategoriesAsync();
+    }
     private void OnClick(string text)
     {
         NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Info, Summary = "Button Clicked", Detail = text });

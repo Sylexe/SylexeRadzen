@@ -24,11 +24,7 @@ public class SylexeDB : DbContext
         {
             new SylexeReports
             {
-                Id = 1, Name = "Aquasec", Timestamp = "aujourdhui"
-            },
-            new SylexeReports
-            {
-                Id = 2, Name = "DockerRandom", Timestamp = "demain"
+                Id = 1, Name = "Aquasec", Timestamp = "aquasec-trivy_0.34.0-05-juillet-2023-14_36_55", Path = "rat.json"
             }
         };
     }

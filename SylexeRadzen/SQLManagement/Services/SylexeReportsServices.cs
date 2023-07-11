@@ -11,17 +11,28 @@ public interface ISylexeReportsServices
     Task<SylexeReports> AddCategoriesAsync(SylexeReports categories);
     Task<SylexeReports> UpdateCategoriesAsync(SylexeReports categories);
     Task DeleteCategoriesAsync(SylexeReports categories);
+    string GetPathOfJson();
+    void SetPathOfJson(string pathOfJson);
 }
 
 public class SylexeReportsServices : ISylexeReportsServices
 {
     private SylexeDB dbContext;
+    private string pathOfJson = "None";
     
     public SylexeReportsServices(SylexeDB dbContext)
     {
         this.dbContext = dbContext;
     }
-    
+
+    public string GetPathOfJson()
+    {
+        return this.pathOfJson;
+    }
+    public void SetPathOfJson(string path)
+    {
+        this.pathOfJson = path;
+    }
     public async Task<List<SylexeReports>> GetCategoriesAsync()
     {
         return await dbContext.sylexeReports.ToListAsync();

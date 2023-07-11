@@ -4,11 +4,13 @@
 @using System.IO
 @using System.Diagnostics
 @using System.ComponentModel
+@using System.Runtime.InteropServices.JavaScript
 @using Microsoft.AspNetCore.Hosting
 @using Microsoft.Extensions.Logging
 @using SylexeRadzen.SQLManagement.Services;
 @using SylexeRadzen.SQLManagement.Context;
 @using SylexeRadzen.SQLManagement.Definitions;
+@using System.Text.RegularExpressions;
 @inject ILogger<Analyze> Logger
 @inject IWebHostEnvironment WebEnvironment
 @inject ISylexeReportsServices _sylexeService
@@ -17,7 +19,7 @@
 <PageTitle>Analyse</PageTitle>
 
 <!--Faire des RadzenStack dans des Radzen card et mettre le texte dans un radzenCard-->
-
+<!--
 <RadzenCard class="p-0">
     <RadzenStack Orientation="@orientation" Gap="@gap" Reverse="@reverse" JustifyContent="@justifyContent" AlignItems="@alignItems" Style="height: 550px">
         <RadzenCard class="p-1 rz-background-color-info rz-color-on-info rz-text-align-center ma-16" style="height: 80%; width: 40%;">
@@ -36,8 +38,8 @@
         </RadzenCard>
     </RadzenStack>
 </RadzenCard>
-
-<!--<input @bind-value="@docker.Name" @bind-value:event="oninput" />
+-->
+<input @bind-value="@docker.Name" @bind-value:event="oninput" />
 <input @bind-value="@pathForDocker" @bind-value:event="oninput" />
 
 <p>
@@ -61,7 +63,7 @@
     </label>
 </p>
 
-<button @onclick="@(() => ExecTrivyScan(docker.Name))">Execute Scan</button>-->
+<button @onclick="@(() => ExecTrivyScan(docker.Name))">Execute Scan</button>
 
 
 @if (isLoading)
@@ -128,7 +130,7 @@ else
         }
 
         isLoading = false;
-    }
+    }   
 
     void ExecTrivyScan(string DockerScan)
     {
@@ -137,17 +139,25 @@ else
         serverSideProcess.StartInfo.FileName = Environment.GetEnvironmentVariable("docker");
         serverSideProcess.StartInfo.FileName = @"C:\Program Files\Docker\Docker\resources\bin\docker.exe";
         var path = Path.Combine(WebEnvironment.ContentRootPath, WebEnvironment.EnvironmentName);
-        serverSideProcess.StartInfo.Arguments = String.Format("run -v {0}:/result aquasec/trivy:0.34.0 -d image -f json -o /result/rat.json {1}", pathForDocker, DockerScan);
+        DateTime currentDateTime = DateTime.Now;
+        string formattedDateTime = currentDateTime.ToString("dd-MMMM-yyyy-HH:mm:ss");
+        
+        string input = (DockerScan + "-" + formattedDateTime);
+        string temp = Regex.Replace(input, @"\/", "-");
+        string pathOfJson = Regex.Replace(temp, @":", "_");
+        
+        serverSideProcess.StartInfo.Arguments = String.Format("run -v {0}:/result aquasec/trivy:0.34.0 -d image -f json -o /result/{1}.json {2}", path, pathOfJson, DockerScan);
         serverSideProcess.EnableRaisingEvents = true;
         serverSideProcess.StartInfo.UseShellExecute = true;
         serverSideProcess.Start();
-        var date = new DateOnly().ToString();
+        
         _sylexeService.AddCategoriesAsync(new SylexeReports
             {
-                Id = 1,
                 Name = DockerScan,
-                Timestamp = date
+                Timestamp = formattedDateTime,
+                Path = pathOfJson+".json"
             });
+        _sylexeService.SetPathOfJson(pathOfJson+".json");
     }
     
     Orientation orientation = Orientation.Horizontal;

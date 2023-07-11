@@ -1,17 +1,32 @@
 ﻿@page "/fetchdata"
 @inject IWebHostEnvironment Environment
 @inject IJSRuntime JS
+@using SylexeRadzen.SQLManagement.Definitions
+@using SylexeRadzen.SQLManagement.Context;
+@using SylexeRadzen.SQLManagement.Services;
+@inject ISylexeReportsServices _sylexeService
 @using System.Runtime.Serialization.Json;
 @using System.Text.Json;
+@using Microsoft.EntityFrameworkCore.Query
 
-@if (metadata == null)
+@if (@metadata == null)
 {
     <p>Chargement...</p>
 }
 else
 {
     <p>Employee ID: @metadata.SchemaVersion</p>
+    
+    @foreach (var result in metadata.Results)
+    {
+        @foreach (var vuln in @result.Vulnerabilities)
+        {
+            <p>@vuln.VulnerabilityID (@vuln.PrimaryURL) @vuln.CVSS.nvd.V3Score (@vuln.Severity) @vuln.PkgName @vuln.Description </p>
+        }
+    }
+    
     <p>OS: @metadata.Metadata.OS.Name</p>
+    <p>Family: @metadata.Metadata.OS.Family</p>
     <p></p>
     <button @onclick="DownloadJsonFile">Export to JSON</button>
 }
@@ -19,9 +34,11 @@ else
 
 @code {
 
+    List<Results> bouhbouh;
+
     private async Task DownloadJsonFile()
     {
-        var fileName = "rat.json";
+        var fileName = _sylexeService.GetPathOfJson();
         var path = Path.Combine(Environment.ContentRootPath, Environment.EnvironmentName, fileName);
 
         await using FileStream fs = new(path, FileMode.Open);
@@ -31,11 +48,12 @@ else
         await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
     }
 
-    private MetadataJson metadata;
+    private MetadataJson metadata = null;
 
     protected override async Task OnInitializedAsync()
     {
-        var fileName = "rat.json";
+        var fileName = _sylexeService.GetPathOfJson();
+            <!--var fileName = "aquasec-trivy_0.34.0-10-juillet-2023-11_20_09.json";-->
         var path = Path.Combine(Environment.ContentRootPath, Environment.EnvironmentName, fileName);
 
         await using FileStream fs = new(path, FileMode.Open);
@@ -43,6 +61,7 @@ else
         StreamReader reader = new StreamReader(fs);
         string fileContent = await reader.ReadToEndAsync();
         metadata = JsonSerializer.Deserialize<MetadataJson>(fileContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
     }
 
 
@@ -52,6 +71,7 @@ else
         public string ArtifactName { get; set; }
         public string ArtifactType { get; set; }
         public Metadata Metadata { get; set; }
+        public List<Results> Results { get; set; }
 
     }
 
@@ -63,7 +83,6 @@ else
         public string[] RepoTags { get; set; }
         public string[] RepoDigests { get; set; }
         public ImageConfig ImageConfig { get; set; }
-        public List<Results> Results { get; set; }
     }
 
     public class OS
@@ -129,7 +148,7 @@ else
         public String InstalledVersion { get; set; }
         public Layer Layer { get; set; }
         public String SeveritySource { get; set; }
-        public String PrimarySource { get; set; }
+        public String PrimaryURL { get; set; }
         public DataSource DataSource { get; set; }
         public String Title { get; set; }
         public String Description { get; set; }
