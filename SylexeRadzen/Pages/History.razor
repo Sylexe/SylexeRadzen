@@ -13,49 +13,59 @@
 @inject ISylexeReportsServices _sylexeService
 @inject NotificationService NotificationService
 @inject NavigationManager NavigationManager
+@using Microsoft.EntityFrameworkCore
 
 <PageTitle>History</PageTitle>
 
-<RadzenCard class="p-0">
-    <RadzenStack Orientation="@orientation" Gap="@gap" Reverse="@reverse" JustifyContent="@justifyContent" AlignItems="@alignItems" Style="height: 350px">
-        
-        @foreach (var report  in reports)
-        {
-            <RadzenRow  Style="background-color:#D7DBE0;padding: 10px;border-radius: 10px;">
-                <RadzenColumn Style="">
-                    <RadzenCard style="height: 80px; width: 200px;background-color:#577296;color:white;text-align:center;vertical-align:center;font-size: 25px">
-                        @report.Name
-                    </RadzenCard>
-                </RadzenColumn>
-                <RadzenColumn Style="">
-                    <RadzenCard style="height: 80px; width: 400px; background-color:#D7DBE0; color: white; text-align: center;vertical-align: center;font-size: 25px">
-                        @report.Timestamp
-                    </RadzenCard>
-                </RadzenColumn>
-                <RadzenColumn>
-                    <RadzenButton Click=@(args => OnClick(@report)) Text="+" ButtonStyle="ButtonStyle.Primary" Style="background-color:#375A8B;margin-top: 20px;font-size: 20px"/>
-                </RadzenColumn>
-            </RadzenRow>
-        }
-    </RadzenStack>
-</RadzenCard>
+    <RadzenDataList AllowVirtualization=@allowVirtualization Style="@(allowVirtualization ? "height:auto;overflow:auto;" : "")" 
+                    WrapItems="@(!allowVirtualization)" AllowPaging="@(!allowVirtualization)"
+                    Data="@reports" TItem="SylexeReports" PageSize="5" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true">
+        <Template Context="report">
+            <RadzenCard Style="width: 100%; padding: 0;">
+                <RadzenRow Gap="0">
+                    <RadzenColumn Size="9" SizeLG="2" Class="product-title">
+                        <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" class="rz-color-secondary" Style="text-align: center; vertical-align: middle">@report.Name</RadzenText>
+                    </RadzenColumn>
+                    <RadzenColumn Size="9" SizeLG="5">
+                        <RadzenRow>
+                            <RadzenColumn Size="12">
+                                <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" Style="text-align: center; vertical-align: middle">Date</RadzenText>
+                                <RadzenText TextStyle="TextStyle.Body2" Style="text-align: center; vertical-align: middle">@(@report.Timestamp)</RadzenText>
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenColumn>
+                    <RadzenColumn Size="9" SizeLG="3" Class="rz-ml-12 rz-pt-4 rz-pr-12">
+                        <RadzenButton Click=@(args => OnClick(report)) Icon="add_circle_outline" ButtonStyle="ButtonStyle.Primary" />
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenCard>
+        </Template>
+    </RadzenDataList>
 
-
+<style>
+.product-title {
+    background-color: var(--rz-secondary-lighter);
+}
+.price-badge {
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 20px;
+    padding: 8px;
+}
+</style>
 
 @code {
-    Orientation orientation = Orientation.Vertical;
-    AlignItems alignItems = AlignItems.Center;
-    JustifyContent justifyContent = JustifyContent.Center;
-    FlexWrap wrap = FlexWrap.NoWrap;
-    string gap = "10px";
-    bool reverse;
+    bool allowVirtualization = true;
+
     List<SylexeReports> reports;
+
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        
+
         reports = await _sylexeService.GetCategoriesAsync();
     }
+    
     private void OnClick(SylexeReports report)
     {
         _sylexeService.SetPathOfJson(report.Path);
