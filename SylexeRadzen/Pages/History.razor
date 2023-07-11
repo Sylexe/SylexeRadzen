@@ -14,3 +14,65 @@
 @inject NotificationService NotificationService
 @inject NavigationManager NavigationManager
 
+@using Microsoft.EntityFrameworkCore
+
+<PageTitle>History</PageTitle>
+
+    <RadzenDataList AllowVirtualization=@allowVirtualization Style="@(allowVirtualization ? "height:auto;overflow:auto;" : "")" 
+                    WrapItems="@(!allowVirtualization)" AllowPaging="@(!allowVirtualization)"
+                    Data="@reports" TItem="SylexeReports" PageSize="5" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true">
+        <Template Context="report">
+            <RadzenCard Style="width: 100%; padding: 0;">
+                <RadzenRow Gap="0">
+                    <RadzenColumn Size="9" SizeLG="2" Class="product-title">
+                        <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" class="rz-color-secondary" Style="text-align: center; vertical-align: middle">@report.Name</RadzenText>
+                    </RadzenColumn>
+                    <RadzenColumn Size="9" SizeLG="5">
+                        <RadzenRow>
+                            <RadzenColumn Size="12">
+                                <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" Style="text-align: center; vertical-align: middle">Date</RadzenText>
+                                <RadzenText TextStyle="TextStyle.Body2" Style="text-align: center; vertical-align: middle">@(@report.Timestamp)</RadzenText>
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenColumn>
+                    <RadzenColumn Size="9" SizeLG="3" Class="rz-ml-12 rz-pt-4 rz-pr-12">
+                        <RadzenButton Click=@(args => OnClick(report)) Icon="add_circle_outline" ButtonStyle="ButtonStyle.Primary" />
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenCard>
+        </Template>
+    </RadzenDataList>
+
+<style>
+.product-title {
+    background-color: var(--rz-secondary-lighter);
+}
+.price-badge {
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 20px;
+    padding: 8px;
+}
+</style>
+
+@code {
+    bool allowVirtualization = true;
+
+    List<SylexeReports> reports;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        reports = await _sylexeService.GetCategoriesAsync();
+    }
+    
+    private void OnClick(SylexeReports report)
+    {
+        _sylexeService.SetPathOfJson(report.Path);
+        NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Info, Summary = "Button Clicked"});
+        NavigationManager.NavigateTo("/FetchData");
+    }
+
+}
+
