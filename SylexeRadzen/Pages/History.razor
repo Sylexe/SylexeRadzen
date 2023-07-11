@@ -60,6 +60,6 @@
     {
         _sylexeService.SetPathOfJson(report.Path);
         NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Info, Summary = "Button Clicked"});
-        NavigationManager.NavigateTo("https://localhost:44391/FetchData");
+        NavigationManager.NavigateTo("/FetchData");
     }
 }

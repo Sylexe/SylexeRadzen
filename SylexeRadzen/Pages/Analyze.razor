@@ -114,7 +114,7 @@ else
             {
                 loadedFiles.Add(file);
 
-                var trustedFileNameForFileStorage = Path.GetRandomFileName();
+                var trustedFileNameForFileStorage = file.Name;
                 var path = Path.Combine(WebEnvironment.ContentRootPath,
                         WebEnvironment.EnvironmentName, "unsafe_uploads",
                         trustedFileNameForFileStorage);
@@ -135,8 +135,8 @@ else
     void ExecTrivyScan(string DockerScan)
     {
         Process serverSideProcess = new Process();
-        //docker run -v C: \Users\lesgu\result:/ result aquasec / trivy:0.34.0 - d image - f json - o / result / rat.json aquasec / trivy:0.34.0
-        serverSideProcess.StartInfo.FileName = Environment.GetEnvironmentVariable("docker");
+    //docker run -v C: \Users\lesgu\result:/ result aquasec / trivy:0.34.0 - d image - f json - o / result / rat.json aquasec / trivy:0.34.0
+        serverSideProcess.StartInfo.FileName = Environment.GetEnvironmentVariable("Path");
         serverSideProcess.StartInfo.FileName = @"C:\Program Files\Docker\Docker\resources\bin\docker.exe";
         var path = Path.Combine(WebEnvironment.ContentRootPath, WebEnvironment.EnvironmentName);
         DateTime currentDateTime = DateTime.Now;
@@ -152,13 +152,14 @@ else
         serverSideProcess.Start();
         
         _sylexeService.AddCategoriesAsync(new SylexeReports
-            {
-                Name = DockerScan,
-                Timestamp = formattedDateTime,
-                Path = pathOfJson+".json"
-            });
+        {
+            Name = DockerScan,
+            Timestamp = formattedDateTime,
+            Path = pathOfJson+".json"
+        });
         _sylexeService.SetPathOfJson(pathOfJson+".json");
     }
+    
     
     Orientation orientation = Orientation.Horizontal;
     Orientation orientation2 = Orientation.Vertical;
