@@ -1,6 +1,8 @@
-# SylexeRadzen
+![banner](images/sylexe-logo-zip-file/sylexe_banner.png)
 
-![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/Sylexe/SylexeRadzen/dotnet.yml?style=flat-square) ![GitHub all releases](https://img.shields.io/github/downloads/sylexe/sylexeradzen/total?style=flat-square)
+<p align="center"> 
+  <img src="https://img.shields.io/github/actions/workflow/status/Sylexe/SylexeRadzen/dotnet.yml?style=flat-square"/> <img src="https://img.shields.io/github/downloads/sylexe/sylexeradzen/total?style=flat-square"/>
+</p>
 
 ## Introduction
 
