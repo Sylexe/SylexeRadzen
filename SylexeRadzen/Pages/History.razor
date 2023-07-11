@@ -12,6 +12,7 @@
 @inject IWebHostEnvironment WebEnvironment
 @inject ISylexeReportsServices _sylexeService
 @inject NotificationService NotificationService
+@inject NavigationManager NavigationManager
 
 <PageTitle>History</PageTitle>
 
@@ -32,40 +33,10 @@
                     </RadzenCard>
                 </RadzenColumn>
                 <RadzenColumn>
-                    <RadzenButton Click=@(args => OnClick("Primary button")) Text="+" ButtonStyle="ButtonStyle.Primary" Style="background-color:#375A8B;margin-top: 20px;font-size: 20px"/>
+                    <RadzenButton Click=@(args => OnClick(@report)) Text="+" ButtonStyle="ButtonStyle.Primary" Style="background-color:#375A8B;margin-top: 20px;font-size: 20px"/>
                 </RadzenColumn>
             </RadzenRow>
         }
-        <RadzenRow  Style="background-color:#D7DBE0;padding: 10px;border-radius: 10px;">
-            <RadzenColumn Style="">
-                <RadzenCard style="height: 80px; width: 200px;background-color:#577296;color:black;text-align:center;vertical-align:center;font-size: 25px">
-                    Nom
-                </RadzenCard>
-            </RadzenColumn>
-            <RadzenColumn Style="">
-                <RadzenCard style="height: 80px; width: 400px; background-color:#D7DBE0; color: black; text-align: center;vertical-align: center;font-size: 25px">
-                    Date
-                </RadzenCard>
-            </RadzenColumn>
-            <RadzenColumn>
-                <RadzenButton Click=@(args => OnClick("Primary button")) Text="+" ButtonStyle="ButtonStyle.Primary" Style="background-color:#375A8B;margin-top: 20px;font-size: 20px"/>
-            </RadzenColumn>
-        </RadzenRow>
-        <RadzenRow  Style="background-color:#D7DBE0;padding: 10px;border-radius: 10px;">
-            <RadzenColumn Style="">
-                <RadzenCard style="height: 80px; width: 200px;background-color:#577296;color:white;text-align:center;vertical-align:center;font-size: 25px">
-                    Nom
-                </RadzenCard>
-            </RadzenColumn>
-            <RadzenColumn Style="">
-                <RadzenCard style="height: 80px; width: 400px; background-color:#D7DBE0; color: black; text-align: center;vertical-align: center;font-size: 25px">
-                    Date
-                </RadzenCard>
-            </RadzenColumn>
-            <RadzenColumn>
-                <RadzenButton Click=@(args => OnClick("Primary button")) Text="+" ButtonStyle="ButtonStyle.Primary" Style="background-color:#375A8B;margin-top: 20px;font-size: 20px"/>
-            </RadzenColumn>
-        </RadzenRow>
     </RadzenStack>
 </RadzenCard>
 
@@ -85,8 +56,10 @@
         
         reports = await _sylexeService.GetCategoriesAsync();
     }
-    private void OnClick(string text)
+    private void OnClick(SylexeReports report)
     {
-        NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Info, Summary = "Button Clicked", Detail = text });
+        _sylexeService.SetPathOfJson(report.Path);
+        NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Info, Summary = "Button Clicked"});
+        NavigationManager.NavigateTo("https://localhost:44391/FetchData");
     }
 }
