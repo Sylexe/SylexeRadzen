@@ -7,55 +7,67 @@
 @using Components
 @inject DialogService DialogService
 
-<RadzenCard>
+<PageTitle>Résultats</PageTitle>
 
-<RadzenDataList AllowVirtualization=@true Style="@(allowVirtualization ? "height:auto;overflow:auto;" : "")" 
-                    WrapItems="@(!allowVirtualization)" AllowPaging="@(!allowVirtualization)"
-                    Data="@bouhbouh" TItem="Vulnerabilities" PageSize="6" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="false">
-        <Template Context="product">
-            <RadzenCard Style="width: 100%; padding: 0;">
-                <RadzenRow Gap="0">
-                    <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4 product-title">
-                        <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" class="rz-color-secondary">@(product.VulnerabilityID)</RadzenText>
-                    </RadzenColumn>
-                    <RadzenColumn Size="12" SizeLG="7" Class="rz-p-4">
-                        <RadzenRow Gap="0">
-                            <RadzenColumn Size="12" SizeMD="6" SizeLG="2">
-                                <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" Class="rz-mb-0">Pkg Name</RadzenText>
-                                <RadzenText TextStyle="TextStyle.Body2">@(product.PkgName)</RadzenText>
-                            </RadzenColumn>
-                            <RadzenColumn Size="12" SizeMD="6" SizeLG="2">
-                                <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" Class="rz-mb-0">Score</RadzenText>
-                                <RadzenText TextStyle="TextStyle.Body2">@(product.CVSS.nvd.V3Score)</RadzenText>
-                            </RadzenColumn>
-                            <RadzenColumn Size="12" SizeMD="6" SizeLG="5">
-                                <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" Class="rz-mb-0">Description</RadzenText>
-                                <RadzenText TextStyle="TextStyle.Body2">@(product.Description[..50])</RadzenText>
-                            </RadzenColumn>
-                            <RadzenColumn Size="12" SizeMD="6" SizeLG="3" Class="rz-text-align-start rz-text-align-lg-end">
-                                @if (product.Severity == "CRITICAL")
-                                {
-                                    <RadzenBadge BadgeStyle="BadgeStyle.Danger" Shade="Shade.Lighter" class="price-badge" Text="CRITIQUE"/>
-                                } else if (product.Severity == "HIGH")
-                                {
-                                    <RadzenBadge BadgeStyle="BadgeStyle.Warning" Shade="Shade.Lighter" class="price-badge" Text="HAUTE"/>
-                                } else if (product.Severity == "MEDIUM")
-                                {
-                                    <RadzenBadge BadgeStyle="BadgeStyle.Info" Shade="Shade.Lighter" class="price-badge" Text="MOYENNE"/>
-                                } else if (product.Severity == "LOW")
-                                {
-                                    <RadzenBadge BadgeStyle="BadgeStyle.Success" Shade="Shade.Lighter" class="price-badge" Text="FAIBLE"/>
-                                }
-                            </RadzenColumn>
-                        </RadzenRow>
-                    </RadzenColumn>
-                    <RadzenColumn Size="12" SizeLG="1" Class="rz-p-4">
-                        <RadzenButton Click=@(args => ShowInlineDialog(@product.Description)) Icon="add_circle_outline" ButtonStyle="ButtonStyle.Primary" />
-                    </RadzenColumn>
-                </RadzenRow>
-            </RadzenCard>
-        </Template>
-    </RadzenDataList>
+<h1>Résultat de l'analyse</h1>
+
+<div class="container">
+    <div class="row">
+        <div class="col-sm-12 col-lg-6 offset-lg-3 my-5">
+            <RadzenChart>
+                <RadzenDonutSeries Data="@VulnSeverity" CategoryProperty="Severity" ValueProperty="Numbers">
+                    <ChildContent>
+                        <RadzenSeriesDataLabels Visible="@showDataLabels" />
+                    </ChildContent>
+                    <TitleTemplate>
+                        <div class="rz-donut-content">
+                            <div>Vuln.</div>
+                        </div>
+                    </TitleTemplate>
+                </RadzenDonutSeries>
+            </RadzenChart>
+        </div>
+    </div>
+</div>
+
+<p>Voici la liste des vulnérabilités actuellement mise en avant par Trivy :</p>
+
+<RadzenCard>
+    <RadzenDataGrid style="height: auto" @ref="grid" IsLoading="false" Count="@count" Data="@broute" LoadData="@LoadData" AllowSorting="true" AllowFiltering="false" AllowPaging="false" PagerHorizontalAlign="HorizontalAlign.Center" TItem="Vulnerabilities" ColumnWidth="200px">
+        <Columns>
+            <RadzenDataGridColumn TItem="Vulnerabilities" Property="VulnerabilityID" Filterable="false" Title="CVE" Frozen="true" Width="20px" TextAlign="TextAlign.Center"/>
+            <RadzenDataGridColumn TItem="Vulnerabilities" Property="PkgName" Filterable="false" Title="Nom du Package" Frozen="true" Width="20px" TextAlign="TextAlign.Center"/>
+            <RadzenDataGridColumn TItem="Vulnerabilities" Property="CVSS.nvd.V3Score" Filterable="false" Title="Score" Frozen="true" Width="20px" TextAlign="TextAlign.Center"/>
+            <RadzenDataGridColumn TItem="Vulnerabilities" Title="Description" Frozen="true" Sortable="false" Filterable="false" Width="80px" TextAlign="TextAlign.Center" >
+                <Template Context="data">
+                    <RadzenText TextStyle="TextStyle.Body2">@(data.Description)</RadzenText>
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="Vulnerabilities" Title="Criticité" Frozen="true" Sortable="false" Filterable="false" Width="20px" TextAlign="TextAlign.Center" >
+                <Template Context="data">
+                    @if (data.Severity == "CRITICAL")
+                    {
+                        <RadzenBadge BadgeStyle="BadgeStyle.Danger" Shade="Shade.Lighter" class="price-badge" Text="CRITIQUE"/>
+                    } else if (data.Severity == "HIGH")
+                    {
+                        <RadzenBadge BadgeStyle="BadgeStyle.Warning" Shade="Shade.Lighter" class="price-badge" Text="HAUTE"/>
+                    } else if (data.Severity == "MEDIUM")
+                    {
+                        <RadzenBadge BadgeStyle="BadgeStyle.Info" Shade="Shade.Lighter" class="price-badge" Text="MOYENNE"/>
+                    } else if (data.Severity == "LOW")
+                    {
+                        <RadzenBadge BadgeStyle="BadgeStyle.Success" Shade="Shade.Lighter" class="price-badge" Text="FAIBLE"/>
+                    }
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="Vulnerabilities" Title="Détails" Frozen="true" Sortable="false" Filterable="false" Width="30px" TextAlign="TextAlign.Center" >
+                <Template Context="data">
+                    <RadzenButton Click=@(args => ShowInlineDialog(@data.Description)) Icon="add_circle_outline" ButtonStyle="ButtonStyle.Primary" />
+                    <RadzenButton Click=@(args => ShowInlineDialog(@data.Description)) class="rz-ml-1" Text="NVD Link" ButtonStyle="ButtonStyle.Primary" />
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
 </RadzenCard>
 
 @if (@metadata == null)
@@ -64,7 +76,7 @@
 }
 else
 {
-    <RadzenCard>
+    <RadzenCard class="rz-mt-2">
         <RadzenButton Text="Exporter les données" Click="@DownloadJsonFile" />
     </RadzenCard>
 }
@@ -83,10 +95,16 @@ else
 </style>
 
 @code {
-
+    bool showDataLabels = true;
     List<Vulnerabilities> filteredBouhbouh;
     List<Vulnerabilities> bouhbouh;
     bool allowVirtualization = true;
+    int count;
+    bool isLoading = false;
+    DataItem[] VulnSeverity;
+
+    RadzenDataGrid<Vulnerabilities> grid;
+    IEnumerable<Vulnerabilities> broute;
     
     IEnumerable<int> selectedIds;
     IEnumerable<int> orderIds;
@@ -125,7 +143,50 @@ else
         StreamReader reader = new StreamReader(fs);
         string fileContent = await reader.ReadToEndAsync();
         metadata = JsonSerializer.Deserialize<MetadataJson>(fileContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-        bouhbouh = metadata.Results[0].Vulnerabilities;
+        broute = metadata.Results[0].Vulnerabilities.ToList();
+        VulnSeverity = new DataItem[] {
+            new DataItem
+            {
+                Severity = "CRITIQUE",
+                Numbers = broute.Where(l => l.Severity == "CRITICAL").Count()
+            },
+            new DataItem
+            {
+                Severity = "HAUTE",
+                Numbers = broute.Where(l => l.Severity == "HIGH").Count()
+            },
+            new DataItem
+            {
+                Severity = "MOYENNE",
+                Numbers = broute.Where(l => l.Severity == "MEDIUM").Count()
+            },
+            new DataItem
+            {
+                Severity = "FAIBLE",
+                Numbers = broute.Where(l => l.Severity == "LOW").Count()
+            },
+        };
+    }
+    
+    async Task LoadData(LoadDataArgs args)
+    {
+        isLoading = true;
+
+        await Task.Yield();
+
+        var query = metadata.Results[0].Vulnerabilities.AsQueryable();
+
+        count = query.Count();
+
+        broute = query.Skip(args.Skip.Value).Take(args.Top.Value).ToList();
+
+        isLoading = false;
+    }
+    
+    class DataItem
+    {
+        public string Severity { get; set; }
+        public double Numbers { get; set; }
     }
 
     public class MetadataJson
