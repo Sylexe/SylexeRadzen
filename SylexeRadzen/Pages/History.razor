@@ -17,30 +17,23 @@
 
 <PageTitle>History</PageTitle>
 
-    <RadzenDataList AllowVirtualization=@allowVirtualization Style="@(allowVirtualization ? "height:auto;overflow:auto;" : "")" 
-                    WrapItems="@(!allowVirtualization)" AllowPaging="@(!allowVirtualization)"
-                    Data="@reports" TItem="SylexeReports" PageSize="5" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true">
-        <Template Context="report">
-            <RadzenCard Style="width: 100%; padding: 0;">
-                <RadzenRow Gap="0">
-                    <RadzenColumn Size="9" SizeLG="2" Class="product-title">
-                        <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" class="rz-color-secondary" Style="text-align: center; vertical-align: middle">@report.Name</RadzenText>
-                    </RadzenColumn>
-                    <RadzenColumn Size="9" SizeLG="5">
-                        <RadzenRow>
-                            <RadzenColumn Size="12">
-                                <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" Style="text-align: center; vertical-align: middle">Date</RadzenText>
-                                <RadzenText TextStyle="TextStyle.Body2" Style="text-align: center; vertical-align: middle">@(@report.Timestamp)</RadzenText>
-                            </RadzenColumn>
-                        </RadzenRow>
-                    </RadzenColumn>
-                    <RadzenColumn Size="9" SizeLG="3" Class="rz-ml-12 rz-pt-4 rz-pr-12">
-                        <RadzenButton Click=@(args => OnClick(report)) Icon="add_circle_outline" ButtonStyle="ButtonStyle.Primary" />
-                    </RadzenColumn>
-                </RadzenRow>
-            </RadzenCard>
-        </Template>
-    </RadzenDataList>
+<h1>Historique des analyses</h1>
+
+<p>Voici l'historique des analyses éffecuté depuis la création de votre Instance Sylexe :</p>
+
+<RadzenCard>
+    <RadzenDataGrid style="height: auto" @ref="grid" IsLoading="false" Count="@count" Data="@reports" LoadData="@LoadData" AllowSorting="true" AllowFiltering="false" AllowPaging="false" PagerHorizontalAlign="HorizontalAlign.Center" TItem="SylexeReports" ColumnWidth="200px">
+        <Columns>
+            <RadzenDataGridColumn TItem="SylexeReports" Property="Name" Filterable="false" Title="Nom" Frozen="true" Width="20px" TextAlign="TextAlign.Center"/>
+            <RadzenDataGridColumn TItem="SylexeReports" Property="Timestamp" Filterable="false" Title="Date" Frozen="true" Width="20px" TextAlign="TextAlign.Center"/>
+            <RadzenDataGridColumn TItem="SylexeReports" Title="Résultats" Frozen="true" Sortable="false" Filterable="false" Width="20px" TextAlign="TextAlign.Center" >
+                <Template Context="data">
+                    <RadzenButton Click=@(args => OnClick(data)) Icon="add_circle_outline" ButtonStyle="ButtonStyle.Primary" />
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+</RadzenCard>
 
 <style>
 .product-title {
@@ -56,8 +49,11 @@
 
 @code {
     bool allowVirtualization = true;
-
-    List<SylexeReports> reports;
+    bool isLoading = false;
+    int count;
+    RadzenDataGrid<SylexeReports> grid;
+    
+    IEnumerable<SylexeReports> reports;
 
     protected override async Task OnInitializedAsync()
     {
@@ -71,5 +67,20 @@
         _sylexeService.SetPathOfJson(report.Path);
         NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Fichier chargé", Detail = $"Vous avez sélectionné {report.Name}"});
         NavigationManager.NavigateTo("/FetchData");
+    }
+    
+    async Task LoadData(LoadDataArgs args)
+    {
+        isLoading = true;
+
+        await Task.Yield();
+
+        var query = await _sylexeService.GetCategoriesAsync();
+
+        count = query.Count();
+
+        reports = query.Skip(args.Skip.Value).Take(args.Top.Value).AsQueryable().ToList();
+
+        isLoading = false;
     }
 }
