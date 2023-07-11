@@ -13,7 +13,6 @@
 @inject ISylexeReportsServices _sylexeService
 @inject NotificationService NotificationService
 @inject NavigationManager NavigationManager
-
 @using Microsoft.EntityFrameworkCore
 
 <PageTitle>History</PageTitle>
@@ -73,6 +72,4 @@
         NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Info, Summary = "Button Clicked"});
         NavigationManager.NavigateTo("/FetchData");
     }
-
 }
-
