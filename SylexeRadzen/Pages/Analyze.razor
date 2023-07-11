@@ -18,23 +18,39 @@
 
 <PageTitle>Analyse</PageTitle>
 
-<!--Faire des RadzenStack dans des Radzen card et mettre le texte dans un radzenCard-->
-<!--
 <RadzenCard class="p-0">
-    <RadzenStack Orientation="@orientation" Gap="@gap" Reverse="@reverse" JustifyContent="@justifyContent" AlignItems="@alignItems" Style="height: 550px">
+    <RadzenStack Orientation="@orientation" Gap="@gap" Reverse="@reverse" JustifyContent="@justifyContent" AlignItems="@alignItems" Style="height: 300px">
+        <!--Bloc gauche-->
         <RadzenCard class="p-1 rz-background-color-info rz-color-on-info rz-text-align-center ma-16" style="height: 80%; width: 40%;">
-            Nom Docker
-        </RadzenCard>
-        <RadzenCard class="p-1 rz-color-on-warning rz-black rz-text-align-center" style="height: 80%; width: 5%;">
-            <RadzenCard class="p-1 rz-background-color-success rz-color-on-success rz-text-align-center" style="height: 10%; width: 100%;">
-                <h2 style="border-color: #0a53be;border-radius: 10px">OU</h2>
+            <!--Titre-->
+            <RadzenText TextStyle="TextStyle.H4" class="rz-my-5">Nom Docker</RadzenText>
+            <!--Zone de texte-->
+            <RadzenCard class="rz-background-color-primary-light rz-color-on-info rz-mx-auto" style="height: fit-content; width: 90%;">
+                <RadzenTextBox class="rz-text-align-start rz-vertical-align-center" Placeholder="aquasec/trivy:0.34.0" Style="width: 90%;height: fit-content"/>
             </RadzenCard>
-            <RadzenCard class="p-1 rz-background-color-success rz-color-on-success rz-text-align-center" style="height: 90%; width: 100%;">
-                                
-            </RadzenCard>
+            <br/>
+            <!--Bouton Exécuter-->
+            <RadzenColumn Style="text-align: center">
+                <RadzenButton Shade="Shade.Darker" Click=@(args => ExecTrivyScan(docker.Name)) Text="Execute Scan" ButtonStyle="ButtonStyle.Secondary" />
+            </RadzenColumn>
         </RadzenCard>
-        <RadzenCard class="p-1 rz-background-color-warning rz-color-on-warning rz-text-align-center" style="height: 80%; width: 40%;">
-            C
+        <!--Bloc milieu   rz-background-color-primary-light rz-border-radius-6 rz-black -->
+        <!--<RadzenCard class="p-1 rz-text-align-center rz-border-white" style="height: 10%; width: 10%;"></RadzenCard>-->
+        <RadzenText TextStyle="TextStyle.H3" TextAlign="TextAlign.Center" class="rz-mx-5">OU</RadzenText>
+        
+        <!--Bloc droit-->
+        <RadzenCard class="p-1 rz-background-color-warning rz-color-on-warning rz-text-align-center ma-16" style="height: 80%; width: 40%;">
+            <!--Titre-->
+            <RadzenText TextStyle="TextStyle.H4" class="rz-my-5">Sélectionner DockerFile</RadzenText>
+            <!--Zone de texte-->
+            <RadzenCard class="rz-background-color-warning-light rz-color-on-info rz-mx-auto" style="height: fit-content; width: 90%;">
+                <RadzenTextBox class="rz-text-align-start rz-vertical-align-center" Placeholder="aquasec/trivy:0.34.0" Style="width: 90%;height: fit-content"/>
+            </RadzenCard>
+            <br/>
+            <!--Bouton Exécuter-->
+            <RadzenColumn Style="text-align: center">
+                <RadzenButton Shade="Shade.Darker" Click=@(args => ExecTrivyScan(docker.Name)) Text="Execute Scan" ButtonStyle="ButtonStyle.Secondary" />
+            </RadzenColumn>
         </RadzenCard>
     </RadzenStack>
 </RadzenCard>
@@ -159,7 +175,7 @@ else
             });
         _sylexeService.SetPathOfJson(pathOfJson+".json");
     }
-    
+
     Orientation orientation = Orientation.Horizontal;
     Orientation orientation2 = Orientation.Vertical;
     AlignItems alignItems = AlignItems.Center;
@@ -171,5 +187,4 @@ else
     {
         NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Info, Summary = "Button Clicked", Detail = text });
     }
-
 }
