@@ -13,7 +13,8 @@
             <RadzenHeader>
                 <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
                     <RadzenSidebarToggle Click="@(() => sidebar1Expanded = !sidebar1Expanded)" />
-                    <RadzenLabel Text="Header" />
+                    <RadzenIcon Icon="pix" class="rz-pr-1" />
+                    <RadzenLabel Text="Sylexe" />
                 </RadzenStack>
             </RadzenHeader>
             <RadzenSidebar @bind-Expanded="@sidebar1Expanded">
@@ -23,18 +24,12 @@
                     <RadzenPanelMenuItem Text="Data" Icon="analytics" Path="FetchData"/>
                     <RadzenPanelMenuItem Text="History" Icon="assignment" Path="History"/>
                 </RadzenPanelMenu>
-                <div class="rz-p-4">
-                    Sidebar
-                </div>
             </RadzenSidebar>
             <RadzenBody>
                 <div class="rz-p-4">
                     @Body
                 </div>
             </RadzenBody>
-            <RadzenFooter>
-                Footer
-            </RadzenFooter>
         </RadzenLayout>
 
     </main>

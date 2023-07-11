@@ -23,7 +23,7 @@
         <!--Bloc gauche-->
         <RadzenCard class="p-1 rz-background-color-info rz-color-on-info rz-text-align-center ma-16" style="height: 80%; width: 40%;">
             <!--Titre-->
-            <RadzenText TextStyle="TextStyle.H4" class="rz-my-5">Nom Docker</RadzenText>
+            <RadzenText TextStyle="TextStyle.H4" Style="color:white" class="rz-my-5">Nom du Docker</RadzenText>
             <!--Zone de texte-->
             <RadzenCard class="rz-background-color-primary-light rz-color-on-info rz-mx-auto" style="height: fit-content; width: 90%;">
                 <RadzenTextBox class="rz-text-align-start rz-vertical-align-center" Placeholder="aquasec/trivy:0.34.0" Style="width: 90%;height: fit-content"/>
@@ -54,33 +54,6 @@
         </RadzenCard>
     </RadzenStack>
 </RadzenCard>
--->
-<input @bind-value="@docker.Name" @bind-value:event="oninput" />
-<input @bind-value="@pathForDocker" @bind-value:event="oninput" />
-
-<p>
-    <label>
-        Max file size:
-        <input type="number" @bind="maxFileSize" />
-    </label>
-</p>
-
-<p>
-    <label>
-        Max allowed files:
-        <input type="number" @bind="maxAllowedFiles" />
-    </label>
-</p>
-
-<p>
-    <label>
-        Upload up to @maxAllowedFiles of up to @maxFileSize bytes:
-        <InputFile OnChange="@LoadFiles" multiple />
-    </label>
-</p>
-
-<button @onclick="@(() => ExecTrivyScan(docker.Name))">Execute Scan</button>
-
 
 @if (isLoading)
 {

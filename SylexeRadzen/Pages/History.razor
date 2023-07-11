@@ -69,7 +69,7 @@
     private void OnClick(SylexeReports report)
     {
         _sylexeService.SetPathOfJson(report.Path);
-        NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Info, Summary = "Button Clicked"});
+        NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Fichier chargé", Detail = $"Vous avez sélectionné {report.Name}"});
         NavigationManager.NavigateTo("/FetchData");
     }
 }
