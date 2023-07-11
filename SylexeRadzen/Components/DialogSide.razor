@@ -1,0 +1,12 @@
+<RadzenRow Gap="0rem" Class="rz-p-0 rz-p-lg-2">
+    <RadzenColumn>
+        <RadzenStack>
+            <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Description</RadzenText>
+            <RadzenTextArea Disabled="false" @bind-Value=@Desc Cols="30" Rows="50"/>
+        </RadzenStack>
+    </RadzenColumn>
+    </RadzenRow>
+
+@code {
+    [Parameter] public String Desc { get; set; }
+}

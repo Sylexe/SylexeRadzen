@@ -1,13 +1,62 @@
 ﻿@page "/fetchdata"
 @inject IWebHostEnvironment Environment
 @inject IJSRuntime JS
-@using SylexeRadzen.SQLManagement.Definitions
-@using SylexeRadzen.SQLManagement.Context;
 @using SylexeRadzen.SQLManagement.Services;
 @inject ISylexeReportsServices _sylexeService
-@using System.Runtime.Serialization.Json;
 @using System.Text.Json;
-@using Microsoft.EntityFrameworkCore.Query
+@using Components
+@inject DialogService DialogService
+
+<RadzenCard>
+
+<RadzenDataList AllowVirtualization=@true Style="@(allowVirtualization ? "height:auto;overflow:auto;" : "")" 
+                    WrapItems="@(!allowVirtualization)" AllowPaging="@(!allowVirtualization)"
+                    Data="@bouhbouh" TItem="Vulnerabilities" PageSize="6" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="false">
+        <Template Context="product">
+            <RadzenCard Style="width: 100%; padding: 0;">
+                <RadzenRow Gap="0">
+                    <RadzenColumn Size="12" SizeLG="2" Class="rz-p-4 product-title">
+                        <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" class="rz-color-secondary">@(product.VulnerabilityID)</RadzenText>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeLG="7" Class="rz-p-4">
+                        <RadzenRow Gap="0">
+                            <RadzenColumn Size="12" SizeMD="6" SizeLG="2">
+                                <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" Class="rz-mb-0">Pkg Name</RadzenText>
+                                <RadzenText TextStyle="TextStyle.Body2">@(product.PkgName)</RadzenText>
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="6" SizeLG="2">
+                                <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" Class="rz-mb-0">Score</RadzenText>
+                                <RadzenText TextStyle="TextStyle.Body2">@(product.CVSS.nvd.V3Score)</RadzenText>
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="6" SizeLG="5">
+                                <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" Class="rz-mb-0">Description</RadzenText>
+                                <RadzenText TextStyle="TextStyle.Body2">@(product.Description[..50])</RadzenText>
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="6" SizeLG="3" Class="rz-text-align-start rz-text-align-lg-end">
+                                @if (product.Severity == "CRITICAL")
+                                {
+                                    <RadzenBadge BadgeStyle="BadgeStyle.Danger" Shade="Shade.Lighter" class="price-badge" Text="CRITIQUE"/>
+                                } else if (product.Severity == "HIGH")
+                                {
+                                    <RadzenBadge BadgeStyle="BadgeStyle.Warning" Shade="Shade.Lighter" class="price-badge" Text="HAUTE"/>
+                                } else if (product.Severity == "MEDIUM")
+                                {
+                                    <RadzenBadge BadgeStyle="BadgeStyle.Info" Shade="Shade.Lighter" class="price-badge" Text="MOYENNE"/>
+                                } else if (product.Severity == "LOW")
+                                {
+                                    <RadzenBadge BadgeStyle="BadgeStyle.Success" Shade="Shade.Lighter" class="price-badge" Text="FAIBLE"/>
+                                }
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeLG="1" Class="rz-p-4">
+                        <RadzenButton Click=@(args => ShowInlineDialog(@product.Description)) Icon="add_circle_outline" ButtonStyle="ButtonStyle.Primary" />
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenCard>
+        </Template>
+    </RadzenDataList>
+</RadzenCard>
 
 @if (@metadata == null)
 {
@@ -15,27 +64,32 @@
 }
 else
 {
-    <p>Employee ID: @metadata.SchemaVersion</p>
-    <p>@metadata.ArtifactName</p>
-    
-    @foreach (var result in metadata.Results)
-    {
-        @foreach (var vuln in @result.Vulnerabilities)
-        {
-            <p>@vuln.VulnerabilityID (@vuln.PrimaryURL) @vuln.CVSS.nvd.V3Score (@vuln.Severity) @vuln.PkgName @vuln.Description </p>
-        }
-    }
-    
-    <p>OS: @metadata.Metadata.OS.Name</p>
-    <p>Family: @metadata.Metadata.OS.Family</p>
-    <p></p>
-    <button @onclick="DownloadJsonFile">Export to JSON</button>
+    <RadzenCard>
+        <RadzenButton Text="Exporter les données" Click="@DownloadJsonFile" />
+    </RadzenCard>
 }
 
+<style>
+.product-title {
+    min-height: 72px;
+    background-color: var(--rz-secondary-lighter);
+}
+.price-badge {
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 20px;
+    padding: 8px;
+}
+</style>
 
 @code {
 
-    List<Results> bouhbouh;
+    List<Vulnerabilities> filteredBouhbouh;
+    List<Vulnerabilities> bouhbouh;
+    bool allowVirtualization = true;
+    
+    IEnumerable<int> selectedIds;
+    IEnumerable<int> orderIds;
 
     private async Task DownloadJsonFile()
     {
@@ -48,6 +102,15 @@ else
 
         await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
     }
+    
+    async Task ShowInlineDialog(String descVuln)
+    {
+        var result = await DialogService.OpenSideAsync<DialogSide>("Détails", new Dictionary<string, object>() {{"Desc", descVuln}}, options: new SideDialogOptions
+        {
+            Position = DialogPosition.Right
+        });
+    }
+    
 
     private MetadataJson metadata = null;
 
@@ -62,9 +125,8 @@ else
         StreamReader reader = new StreamReader(fs);
         string fileContent = await reader.ReadToEndAsync();
         metadata = JsonSerializer.Deserialize<MetadataJson>(fileContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
+        bouhbouh = metadata.Results[0].Vulnerabilities;
     }
-
 
     public class MetadataJson
     {

@@ -17,7 +17,10 @@ builder.Services.AddDbContext<SylexeDB>(optionsBuilder =>
     optionsBuilder.UseSqlite("Data Source = Dev_Sylexe.db");
 });
 
+builder.Services.AddScoped<DialogService>();
 builder.Services.AddScoped<NotificationService>();
+builder.Services.AddScoped<TooltipService>();
+builder.Services.AddScoped<ContextMenuService>();
 
 var app = builder.Build();
 
