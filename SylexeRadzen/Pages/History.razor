@@ -5,10 +5,12 @@
 @using System.ComponentModel
 @using Microsoft.AspNetCore.Hosting
 @using Microsoft.Extensions.Logging
+@using SylexeRadzen.SQLManagement.Definitions
+@using SylexeRadzen.SQLManagement.Context;
 @using SylexeRadzen.SQLManagement.Services;
 @inject ILogger<History> Logger
 @inject IWebHostEnvironment WebEnvironment
 @inject ISylexeReportsServices _sylexeService
 @inject NotificationService NotificationService
+@inject NavigationManager NavigationManager
 
-<PageTitle>History</PageTitle>
