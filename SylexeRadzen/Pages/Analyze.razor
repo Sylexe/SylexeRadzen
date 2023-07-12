@@ -26,7 +26,7 @@
             <RadzenText TextStyle="TextStyle.H4" Style="color:white" class="rz-my-5">Nom du Docker</RadzenText>
             <!--Zone de texte-->
             <RadzenCard class="rz-background-color-primary-light rz-color-on-info rz-mx-auto" style="height: fit-content; width: 90%;">
-                <RadzenTextBox class="rz-text-align-start rz-vertical-align-center" Placeholder="aquasec/trivy:0.34.0" Style="width: 90%;height: fit-content"/>
+                <RadzenTextBox class="rz-text-align-start rz-vertical-align-center" Placeholder="aquasec/trivy:0.34.0" Style="width: 90%;height: fit-content" @oninput=@(args => OnChange(args.Value.ToString())) />
             </RadzenCard>
             <br/>
             <!--Bouton Exécuter-->
@@ -91,6 +91,11 @@ else
         {
             Name = "aquasec/trivy:0.34.0"
         };
+
+    void OnChange(string value)
+    {
+        docker.Name = value;
+    }
 
     private async Task LoadFiles(InputFileChangeEventArgs e)
     {
