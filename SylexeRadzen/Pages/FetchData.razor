@@ -16,7 +16,7 @@
     <div class="row">
         <div class="col-sm-12 col-lg-6 offset-lg-3 my-5">
             <RadzenChart>
-                <RadzenDonutSeries Data="@VulnSeverity" CategoryProperty="Severity" ValueProperty="Numbers">
+                <RadzenDonutSeries Data="@VulnSeverity" CategoryProperty="Severity" ValueProperty="Numbers" Fills=@(new []{"#f03e35", "#eda737", "#41ccd9", "#46d941"})>
                     <ChildContent>
                         <RadzenSeriesDataLabels Visible="@showDataLabels" />
                     </ChildContent>
