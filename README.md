@@ -10,4 +10,4 @@ Lorsque vous travaillez avec des conteneurs (***Docker***) Il est crucial de sav
 
 **Sylexe** est la solution pour renforcer la sécurité de vos déploiements docker , une application web basé sur ***Trivy*** pour scanner vos conteneurs et détecter les vulnérabilités.
 
-Pour plus d'informatione la présentation de **Sylexe** est disponible sur la *[Documentation](https://sylexe.mintlify.app/)*
+Pour plus d'informations la présentation de **Sylexe** est disponible sur la *[Documentation](https://sylexe.mintlify.app/)*
