@@ -18,7 +18,7 @@ public interface ISylexeReportsServices
 public class SylexeReportsServices : ISylexeReportsServices
 {
     private SylexeDB dbContext;
-    private string pathOfJson = "None";
+    private string pathOfJson = "aquasec-trivy_0.34.0-12-juillet-2023-10_54_00.json";
     
     public SylexeReportsServices(SylexeDB dbContext)
     {
