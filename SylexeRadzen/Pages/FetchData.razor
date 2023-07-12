@@ -33,8 +33,18 @@
 
 <p>Voici la liste des vulnérabilités actuellement mise en avant par Trivy :</p>
 
+<RadzenDataFilter class="rz-pb-2" @ref="dataFilter" Auto=true Data="@broute" TItem="Vulnerabilities" ViewChanged=@(view => filteredOrders = view)>
+    <Properties>
+        <RadzenDataFilterProperty TItem="Vulnerabilities" Property="VulnerabilityID" Title="ID CVE" />
+        <RadzenDataFilterProperty TItem="Vulnerabilities" Property="PkgName" Title="Nom du Package" />
+        <RadzenDataFilterProperty TItem="Vulnerabilities" Property="Score" Title="Score" />
+        <RadzenDataFilterProperty TItem="Vulnerabilities" Property="Description" Title="Description" />
+        <RadzenDataFilterProperty TItem="Vulnerabilities" Property="Severity" Title="Criticité" />
+    </Properties>
+</RadzenDataFilter>
+
 <RadzenCard>
-    <RadzenDataGrid style="height: auto" @ref="grid" IsLoading="false" Count="@count" Data="@broute" LoadData="@LoadData" AllowSorting="true" AllowFiltering="false" AllowPaging="false" PagerHorizontalAlign="HorizontalAlign.Center" TItem="Vulnerabilities" ColumnWidth="200px">
+    <RadzenDataGrid style="height: auto" @ref="grid" IsLoading="false" Count="@count" Data="@(filteredOrders ?? broute)" LoadData="@LoadData" AllowSorting="true" AllowFiltering="false" AllowPaging="false" PagerHorizontalAlign="HorizontalAlign.Center" TItem="Vulnerabilities" ColumnWidth="200px">
         <Columns>
             <RadzenDataGridColumn TItem="Vulnerabilities" Property="VulnerabilityID" Filterable="false" Title="CVE" Frozen="true" Width="30px" TextAlign="TextAlign.Center"/>
             <RadzenDataGridColumn TItem="Vulnerabilities" Property="PkgName" Filterable="false" Title="Nom du Package" Frozen="true" Width="20px" TextAlign="TextAlign.Center"/>
@@ -105,7 +115,9 @@ else
     DataItem[] VulnSeverity;
 
     RadzenDataGrid<Vulnerabilities> grid;
+    RadzenDataFilter<Vulnerabilities> dataFilter;
     IEnumerable<Vulnerabilities> broute;
+    IQueryable<Vulnerabilities> filteredOrders;
     
     IEnumerable<int> selectedIds;
     IEnumerable<int> orderIds;
@@ -121,7 +133,7 @@ else
 
         await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
     }
-    
+
     async Task ShowInlineDialog(String descVuln)
     {
         var result = await DialogService.OpenSideAsync<DialogSide>("Détails", new Dictionary<string, object>() {{"Desc", descVuln}}, options: new SideDialogOptions
