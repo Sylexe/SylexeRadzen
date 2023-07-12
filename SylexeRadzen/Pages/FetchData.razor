@@ -6,6 +6,7 @@
 @using System.Text.Json;
 @using Components
 @inject DialogService DialogService
+@inject IJSRuntime JSRuntime;
 
 <PageTitle>Résultats</PageTitle>
 
@@ -35,10 +36,10 @@
 <RadzenCard>
     <RadzenDataGrid style="height: auto" @ref="grid" IsLoading="false" Count="@count" Data="@broute" LoadData="@LoadData" AllowSorting="true" AllowFiltering="false" AllowPaging="false" PagerHorizontalAlign="HorizontalAlign.Center" TItem="Vulnerabilities" ColumnWidth="200px">
         <Columns>
-            <RadzenDataGridColumn TItem="Vulnerabilities" Property="VulnerabilityID" Filterable="false" Title="CVE" Frozen="true" Width="20px" TextAlign="TextAlign.Center"/>
+            <RadzenDataGridColumn TItem="Vulnerabilities" Property="VulnerabilityID" Filterable="false" Title="CVE" Frozen="true" Width="30px" TextAlign="TextAlign.Center"/>
             <RadzenDataGridColumn TItem="Vulnerabilities" Property="PkgName" Filterable="false" Title="Nom du Package" Frozen="true" Width="20px" TextAlign="TextAlign.Center"/>
-            <RadzenDataGridColumn TItem="Vulnerabilities" Property="CVSS.nvd.V3Score" Filterable="false" Title="Score" Frozen="true" Width="20px" TextAlign="TextAlign.Center"/>
-            <RadzenDataGridColumn TItem="Vulnerabilities" Title="Description" Frozen="true" Sortable="false" Filterable="false" Width="80px" TextAlign="TextAlign.Center" >
+            <RadzenDataGridColumn TItem="Vulnerabilities" Property="CVSS.nvd.V3Score" Filterable="false" Title="Score" Frozen="true" Width="10px" TextAlign="TextAlign.Center"/>
+            <RadzenDataGridColumn TItem="Vulnerabilities" Title="Description" Frozen="true" Sortable="false" Filterable="false" Width="70px" TextAlign="TextAlign.Center" >
                 <Template Context="data">
                     <RadzenText TextStyle="TextStyle.Body2">@(data.Description)</RadzenText>
                 </Template>
@@ -63,7 +64,7 @@
             <RadzenDataGridColumn TItem="Vulnerabilities" Title="Détails" Frozen="true" Sortable="false" Filterable="false" Width="30px" TextAlign="TextAlign.Center" >
                 <Template Context="data">
                     <RadzenButton Click=@(args => ShowInlineDialog(@data.Description)) Icon="add_circle_outline" ButtonStyle="ButtonStyle.Primary" />
-                    <RadzenButton Click=@(args => ShowInlineDialog(@data.Description)) class="rz-ml-1" Text="NVD Link" ButtonStyle="ButtonStyle.Primary" />
+                    <RadzenButton Click=@(args => OpenLink(@data.PrimaryURL)) class="rz-ml-1" Text="NVD Link" ButtonStyle="ButtonStyle.Primary" />
                 </Template>
             </RadzenDataGridColumn>
         </Columns>
@@ -181,6 +182,11 @@ else
         broute = query.Skip(args.Skip.Value).Take(args.Top.Value).ToList();
 
         isLoading = false;
+    }
+    
+    private async Task OpenLink(string url)
+    {
+       await JSRuntime.InvokeAsync<object>("open", url);
     }
     
     class DataItem

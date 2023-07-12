@@ -31,7 +31,7 @@
             <br/>
             <!--Bouton Exécuter-->
             <RadzenColumn Style="text-align: center">
-                <RadzenButton Shade="Shade.Darker" Click=@(args => ExecTrivyScan(docker.Name)) Text="Execute Scan" ButtonStyle="ButtonStyle.Secondary" />
+                <RadzenButton Shade="Shade.Darker" Click=@(args => ExecTrivyScan(docker.Name)) Text="Execute Scan" ButtonStyle="ButtonStyle.Secondary"/>
             </RadzenColumn>
         </RadzenCard>
         <!--Bloc milieu   rz-background-color-primary-light rz-border-radius-6 rz-black -->
@@ -44,12 +44,12 @@
             <RadzenText TextStyle="TextStyle.H4" class="rz-my-5">Sélectionner DockerFile</RadzenText>
             <!--Zone de texte-->
             <RadzenCard class="rz-background-color-warning-light rz-color-on-info rz-mx-auto" style="height: fit-content; width: 90%;">
-                <RadzenTextBox class="rz-text-align-start rz-vertical-align-center" Placeholder="aquasec/trivy:0.34.0" Style="width: 90%;height: fit-content"/>
+                <RadzenTextBox class="rz-text-align-start rz-vertical-align-center" Placeholder="aquasec/trivy:0.34.0" Style="width: 90%;height: fit-content" Disabled="true"/>
             </RadzenCard>
             <br/>
             <!--Bouton Exécuter-->
             <RadzenColumn Style="text-align: center">
-                <RadzenButton Shade="Shade.Darker" Click=@(args => ExecTrivyScan(docker.Name)) Text="Execute Scan" ButtonStyle="ButtonStyle.Secondary" />
+                <RadzenButton Shade="Shade.Darker" Click=@(args => ExecTrivyScan(docker.Name)) Text="Execute Scan" ButtonStyle="ButtonStyle.Secondary" Disabled="true"/>
             </RadzenColumn>
         </RadzenCard>
     </RadzenStack>
