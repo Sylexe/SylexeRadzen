@@ -1,19 +1,9 @@
 ﻿@page "/history"
-@using System 
-@using System.IO
-@using System.Diagnostics
-@using System.ComponentModel
-@using Microsoft.AspNetCore.Hosting
-@using Microsoft.Extensions.Logging
 @using SylexeRadzen.SQLManagement.Definitions
-@using SylexeRadzen.SQLManagement.Context;
 @using SylexeRadzen.SQLManagement.Services;
-@inject ILogger<History> Logger
-@inject IWebHostEnvironment WebEnvironment
 @inject ISylexeReportsServices _sylexeService
 @inject NotificationService NotificationService
 @inject NavigationManager NavigationManager
-@using Microsoft.EntityFrameworkCore
 
 <PageTitle>History</PageTitle>
 
@@ -21,8 +11,15 @@
 
 <p>Voici l'historique des analyses éffecuté depuis la création de votre Instance Sylexe :</p>
 
+<RadzenDataFilter class="rz-pb-2" @ref="dataFilter" Auto=true Data="@reports" TItem="SylexeReports" ViewChanged=@(view => filteredOrders = view)>
+    <Properties>
+        <RadzenDataFilterProperty TItem="SylexeReports" Property="Name" Title="Nom" />
+        <RadzenDataFilterProperty TItem="SylexeReports" Property="Timestamp" Title="Date" />
+    </Properties>
+</RadzenDataFilter>
+
 <RadzenCard>
-    <RadzenDataGrid style="height: auto" @ref="grid" IsLoading="false" Count="@count" Data="@reports" LoadData="@LoadData" AllowSorting="true" AllowFiltering="false" AllowPaging="false" PagerHorizontalAlign="HorizontalAlign.Center" TItem="SylexeReports" ColumnWidth="200px">
+    <RadzenDataGrid style="height: auto" @ref="grid" IsLoading="false" Count="@count" Data="@(filteredOrders ?? reports)" LoadData="@LoadData" AllowSorting="true" AllowFiltering="false" AllowPaging="false" PagerHorizontalAlign="HorizontalAlign.Center" TItem="SylexeReports" ColumnWidth="200px">
         <Columns>
             <RadzenDataGridColumn TItem="SylexeReports" Property="Name" Filterable="false" Title="Nom" Frozen="true" Width="20px" TextAlign="TextAlign.Center"/>
             <RadzenDataGridColumn TItem="SylexeReports" Property="Timestamp" Filterable="false" Title="Date" Frozen="true" Width="20px" TextAlign="TextAlign.Center"/>
@@ -52,6 +49,8 @@
     bool isLoading = false;
     int count;
     RadzenDataGrid<SylexeReports> grid;
+    RadzenDataFilter<SylexeReports> dataFilter;
+    IQueryable<SylexeReports> filteredOrders;
     
     IEnumerable<SylexeReports> reports;
 
