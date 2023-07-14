@@ -1,14 +1,10 @@
 ﻿@page "/Analyze"
-@inject IJSRuntime JsRuntime
-@using System 
 @using System.IO
 @using System.Diagnostics
-@using System.ComponentModel
-@using System.Runtime.InteropServices.JavaScript
+@using System.Runtime.InteropServices
 @using Microsoft.AspNetCore.Hosting
 @using Microsoft.Extensions.Logging
 @using SylexeRadzen.SQLManagement.Services;
-@using SylexeRadzen.SQLManagement.Context;
 @using SylexeRadzen.SQLManagement.Definitions;
 @using System.Text.RegularExpressions;
 @inject ILogger<Analyze> Logger
@@ -55,33 +51,20 @@
     </RadzenStack>
 </RadzenCard>
 
-@if (isLoading)
-{
-        <p>Uploading...</p>
-}
-else
-{
-        <ul>
-        @foreach (var file in loadedFiles)
-        {
-                    <li>
-                        <ul>
-                            <li>Name: @file.Name</li>
-                            <li>Last modified: @file.LastModified.ToString()</li>
-                            <li>Size (bytes): @file.Size</li>
-                            <li>Content type: @file.ContentType</li>
-                        </ul>
-                    </li>
-        }
-        </ul>
-}
-
 @code {
     private List<IBrowserFile> loadedFiles = new();
     private long maxFileSize = 1024 * 15;
     private int maxAllowedFiles = 3;
     private bool isLoading;
     public string pathForDocker = "";
+    public bool isWindows;
+    public bool isLinux;
+    public bool isMacOS;
+    private Process serverSideProcess;
+    private String DockerScan;
+    private String formattedDateTime;
+    private String pathOfJson;
+    
     public class Docker
     {
         public string Name { get; set; }
@@ -124,34 +107,72 @@ else
         }
 
         isLoading = false;
-    }   
+    }
 
-    void ExecTrivyScan(string DockerScan)
+    protected override async Task OnInitializedAsync()
     {
-        Process serverSideProcess = new Process();
+        isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+        isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+        isMacOS = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+    }
+
+    void ShowNotification(NotificationMessage message)
+    {
+        NotificationService.Notify(message);
+    }
+    
+    void ExecTrivyScan(string InputReceived)
+    {
+        DockerScan = InputReceived;
+        ShowNotification(new NotificationMessage { Severity = NotificationSeverity.Warning, Summary = "Analyse", Detail = "Lancement de l'analyse...", Duration = 4000 });
+        
+        serverSideProcess = new Process();
         //docker run -v C: \Users\lesgu\result:/ result aquasec / trivy:0.34.0 - d image - f json - o / result / rat.json aquasec / trivy:0.34.0
-        serverSideProcess.StartInfo.FileName = Environment.GetEnvironmentVariable("docker");
-        serverSideProcess.StartInfo.FileName = @"C:\Program Files\Docker\Docker\resources\bin\docker.exe";
+
+        if (isWindows)
+        {
+            serverSideProcess.StartInfo.FileName = @"C:\Program Files\Docker\Docker\resources\bin\docker.exe";
+        } else if (isLinux)
+        {
+            serverSideProcess.StartInfo.FileName = @"/bin/docker";
+        } else if (isMacOS)
+        {
+            serverSideProcess.StartInfo.FileName = @"/bin/docker";
+        }
+        
         var path = Path.Combine(WebEnvironment.ContentRootPath, WebEnvironment.EnvironmentName);
         DateTime currentDateTime = DateTime.Now;
-        string formattedDateTime = currentDateTime.ToString("dd-MMMM-yyyy-HH:mm:ss");
+        formattedDateTime = currentDateTime.ToString("dd-MMMM-yyyy-HH:mm:ss");
         
         string input = (DockerScan + "-" + formattedDateTime);
         string temp = Regex.Replace(input, @"\/", "-");
-        string pathOfJson = Regex.Replace(temp, @":", "_");
+        pathOfJson = Regex.Replace(temp, @":", "_");
         
         serverSideProcess.StartInfo.Arguments = String.Format("run -v {0}:/result aquasec/trivy:0.34.0 -d image -f json -o /result/{1}.json {2}", path, pathOfJson, DockerScan);
         serverSideProcess.EnableRaisingEvents = true;
         serverSideProcess.StartInfo.UseShellExecute = true;
+        serverSideProcess.Exited += new EventHandler(myProcess_Exited);
         serverSideProcess.Start();
         
-        _sylexeService.AddCategoriesAsync(new SylexeReports
+    }
+    
+    private void myProcess_Exited(object sender, System.EventArgs e)
+    {
+        if (serverSideProcess.ExitCode == 0)
+        {
+            ShowNotification(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Succès", Detail = "Tout s'est bien déroulé, vous pouvez vous rendre sur la page Data.", Duration = 4000 });
+            _sylexeService.AddCategoriesAsync(new SylexeReports
             {
                 Name = DockerScan,
                 Timestamp = formattedDateTime,
-                Path = pathOfJson+".json"
+                Path = pathOfJson + ".json"
             });
-        _sylexeService.SetPathOfJson(pathOfJson+".json");
+            _sylexeService.SetPathOfJson(pathOfJson + ".json");
+        }
+        else
+        {
+            ShowNotification(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Erreur", Detail = "L'éxécution s'est mal déroulé, merci de vérifier Docker", Duration = 4000 });
+        }
     }
 
     Orientation orientation = Orientation.Horizontal;
@@ -161,8 +182,4 @@ else
     FlexWrap wrap = FlexWrap.NoWrap;
     string gap = "10px";
     bool reverse;
-    private void OnClick(string text)
-    {
-        NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Info, Summary = "Button Clicked", Detail = text });
-    }
 }

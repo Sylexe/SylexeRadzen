@@ -10,7 +10,7 @@
 
 <PageTitle>Résultats</PageTitle>
 
-<h1>Résultat de l'analyse</h1>
+<h1>Résultat de l'analyse - @ArtifactNameShow</h1>
 
 <div class="container">
     <div class="row">
@@ -113,6 +113,7 @@ else
     int count;
     bool isLoading = false;
     DataItem[] VulnSeverity;
+    public string ArtifactNameShow;
 
     RadzenDataGrid<Vulnerabilities> grid;
     RadzenDataFilter<Vulnerabilities> dataFilter;
@@ -147,6 +148,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        
         var fileName = _sylexeService.GetPathOfJson();
             <!--var fileName = "aquasec-trivy_0.34.0-10-juillet-2023-11_20_09.json";-->
         var path = Path.Combine(Environment.ContentRootPath, Environment.EnvironmentName, fileName);
@@ -157,6 +159,7 @@ else
         string fileContent = await reader.ReadToEndAsync();
         metadata = JsonSerializer.Deserialize<MetadataJson>(fileContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         broute = metadata.Results[0].Vulnerabilities.ToList();
+        ArtifactNameShow = metadata.ArtifactName;
         VulnSeverity = new DataItem[] {
             new DataItem
             {
