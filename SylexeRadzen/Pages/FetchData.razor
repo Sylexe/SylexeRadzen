@@ -10,83 +10,84 @@
 
 <PageTitle>Résultats</PageTitle>
 
-<h1>Résultat de l'analyse - @ArtifactNameShow</h1>
-
-<div class="container">
-    <div class="row">
-        <div class="col-sm-12 col-lg-6 offset-lg-3 my-5">
-            <RadzenChart>
-                <RadzenDonutSeries Data="@VulnSeverity" CategoryProperty="Severity" ValueProperty="Numbers" Fills=@(new []{"#f03e35", "#eda737", "#41ccd9", "#46d941"})>
-                    <ChildContent>
-                        <RadzenSeriesDataLabels Visible="@showDataLabels" />
-                    </ChildContent>
-                    <TitleTemplate>
-                        <div class="rz-donut-content">
-                            <div>Vuln.</div>
-                        </div>
-                    </TitleTemplate>
-                </RadzenDonutSeries>
-            </RadzenChart>
-        </div>
-    </div>
-</div>
-
-<p>Voici la liste des vulnérabilités actuellement mise en avant par Trivy :</p>
-
-<RadzenDataFilter class="rz-pb-2" @ref="dataFilter" Auto=true Data="@broute" TItem="Vulnerabilities" ViewChanged=@(view => filteredOrders = view)>
-    <Properties>
-        <RadzenDataFilterProperty TItem="Vulnerabilities" Property="VulnerabilityID" Title="ID CVE" />
-        <RadzenDataFilterProperty TItem="Vulnerabilities" Property="PkgName" Title="Nom du Package" />
-        <RadzenDataFilterProperty TItem="Vulnerabilities" Property="Score" Title="Score" />
-        <RadzenDataFilterProperty TItem="Vulnerabilities" Property="Description" Title="Description" />
-        <RadzenDataFilterProperty TItem="Vulnerabilities" Property="Severity" Title="Criticité" />
-    </Properties>
-</RadzenDataFilter>
-
-<RadzenCard>
-    <RadzenDataGrid style="height: auto" @ref="grid" IsLoading="false" Count="@count" Data="@(filteredOrders ?? broute)" LoadData="@LoadData" AllowSorting="true" AllowFiltering="false" AllowPaging="false" PagerHorizontalAlign="HorizontalAlign.Center" TItem="Vulnerabilities" ColumnWidth="200px">
-        <Columns>
-            <RadzenDataGridColumn TItem="Vulnerabilities" Property="VulnerabilityID" Filterable="false" Title="CVE" Frozen="true" Width="30px" TextAlign="TextAlign.Center"/>
-            <RadzenDataGridColumn TItem="Vulnerabilities" Property="PkgName" Filterable="false" Title="Nom du Package" Frozen="true" Width="20px" TextAlign="TextAlign.Center"/>
-            <RadzenDataGridColumn TItem="Vulnerabilities" Property="CVSS.nvd.V3Score" Filterable="false" Title="Score" Frozen="true" Width="10px" TextAlign="TextAlign.Center"/>
-            <RadzenDataGridColumn TItem="Vulnerabilities" Title="Description" Frozen="true" Sortable="false" Filterable="false" Width="70px" TextAlign="TextAlign.Center" >
-                <Template Context="data">
-                    <RadzenText TextStyle="TextStyle.Body2">@(data.Description)</RadzenText>
-                </Template>
-            </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="Vulnerabilities" Title="Criticité" Frozen="true" Sortable="false" Filterable="false" Width="20px" TextAlign="TextAlign.Center" >
-                <Template Context="data">
-                    @if (data.Severity == "CRITICAL")
-                    {
-                        <RadzenBadge BadgeStyle="BadgeStyle.Danger" Shade="Shade.Lighter" class="price-badge" Text="CRITIQUE"/>
-                    } else if (data.Severity == "HIGH")
-                    {
-                        <RadzenBadge BadgeStyle="BadgeStyle.Warning" Shade="Shade.Lighter" class="price-badge" Text="HAUTE"/>
-                    } else if (data.Severity == "MEDIUM")
-                    {
-                        <RadzenBadge BadgeStyle="BadgeStyle.Info" Shade="Shade.Lighter" class="price-badge" Text="MOYENNE"/>
-                    } else if (data.Severity == "LOW")
-                    {
-                        <RadzenBadge BadgeStyle="BadgeStyle.Success" Shade="Shade.Lighter" class="price-badge" Text="FAIBLE"/>
-                    }
-                </Template>
-            </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="Vulnerabilities" Title="Détails" Frozen="true" Sortable="false" Filterable="false" Width="30px" TextAlign="TextAlign.Center" >
-                <Template Context="data">
-                    <RadzenButton Click=@(args => ShowInlineDialog(@data.Description)) Icon="add_circle_outline" ButtonStyle="ButtonStyle.Primary" />
-                    <RadzenButton Click=@(args => OpenLink(@data.PrimaryURL)) class="rz-ml-1" Text="NVD Link" ButtonStyle="ButtonStyle.Primary" />
-                </Template>
-            </RadzenDataGridColumn>
-        </Columns>
-    </RadzenDataGrid>
-</RadzenCard>
-
-@if (@metadata == null)
+@if (metadata == null)
 {
-    <p>Chargement...</p>
+    <p>Aucune donnée ici ! Lancez d'abord un scan pour obtenir une visualisation.</p>
 }
 else
 {
+    <h1>Résultat de l'analyse - @ArtifactNameShow</h1>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12 col-lg-6 offset-lg-3 my-5">
+                <RadzenChart>
+                    <RadzenDonutSeries Data="@VulnSeverity" CategoryProperty="Severity" ValueProperty="Numbers" Fills=@(new []{"#f03e35", "#eda737", "#41ccd9", "#46d941"})>
+                        <ChildContent>
+                            <RadzenSeriesDataLabels Visible="@showDataLabels" />
+                        </ChildContent>
+                        <TitleTemplate>
+                            <div class="rz-donut-content">
+                                <div>Vuln.</div>
+                            </div>
+                        </TitleTemplate>
+                    </RadzenDonutSeries>
+                </RadzenChart>
+            </div>
+        </div>
+    </div>
+
+    <p>Voici la liste des vulnérabilités actuellement mise en avant par Trivy :</p>
+
+    <RadzenDataFilter class="rz-pb-2" @ref="dataFilter" Auto=true Data="@broute" TItem="Vulnerabilities" ViewChanged=@(view => filteredOrders = view)>
+        <Properties>
+            <RadzenDataFilterProperty TItem="Vulnerabilities" Property="VulnerabilityID" Title="ID CVE" />
+            <RadzenDataFilterProperty TItem="Vulnerabilities" Property="PkgName" Title="Nom du Package" />
+            <RadzenDataFilterProperty TItem="Vulnerabilities" Property="Score" Title="Score" />
+            <RadzenDataFilterProperty TItem="Vulnerabilities" Property="Description" Title="Description" />
+            <RadzenDataFilterProperty TItem="Vulnerabilities" Property="Severity" Title="Criticité" />
+        </Properties>
+    </RadzenDataFilter>
+
+    <RadzenCard>
+        <RadzenDataGrid style="height: auto" @ref="grid" IsLoading="false" Count="@count" Data="@(filteredOrders ?? broute)" LoadData="@LoadData" AllowSorting="true" AllowFiltering="false" AllowPaging="false" PagerHorizontalAlign="HorizontalAlign.Center" TItem="Vulnerabilities" ColumnWidth="200px">
+            <Columns>
+                <RadzenDataGridColumn TItem="Vulnerabilities" Property="VulnerabilityID" Filterable="false" Title="CVE" Frozen="true" Width="30px" TextAlign="TextAlign.Center"/>
+                <RadzenDataGridColumn TItem="Vulnerabilities" Property="PkgName" Filterable="false" Title="Nom du Package" Frozen="true" Width="20px" TextAlign="TextAlign.Center"/>
+                <RadzenDataGridColumn TItem="Vulnerabilities" Property="CVSS.nvd.V3Score" Filterable="false" Title="Score" Frozen="true" Width="10px" TextAlign="TextAlign.Center"/>
+                <RadzenDataGridColumn TItem="Vulnerabilities" Title="Description" Frozen="true" Sortable="false" Filterable="false" Width="70px" TextAlign="TextAlign.Center" >
+                    <Template Context="data">
+                        <RadzenText TextStyle="TextStyle.Body2">@(data.Description)</RadzenText>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Vulnerabilities" Title="Criticité" Frozen="true" Sortable="false" Filterable="false" Width="20px" TextAlign="TextAlign.Center" >
+                    <Template Context="data">
+                        @if (data.Severity == "CRITICAL")
+                        {
+                            <RadzenBadge BadgeStyle="BadgeStyle.Danger" Shade="Shade.Lighter" class="price-badge" Text="CRITIQUE"/>
+                        } else if (data.Severity == "HIGH")
+                        {
+                            <RadzenBadge BadgeStyle="BadgeStyle.Warning" Shade="Shade.Lighter" class="price-badge" Text="HAUTE"/>
+                        } else if (data.Severity == "MEDIUM")
+                        {
+                            <RadzenBadge BadgeStyle="BadgeStyle.Info" Shade="Shade.Lighter" class="price-badge" Text="MOYENNE"/>
+                        } else if (data.Severity == "LOW")
+                        {
+                            <RadzenBadge BadgeStyle="BadgeStyle.Success" Shade="Shade.Lighter" class="price-badge" Text="FAIBLE"/>
+                        }
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Vulnerabilities" Title="Détails" Frozen="true" Sortable="false" Filterable="false" Width="30px" TextAlign="TextAlign.Center" >
+                    <Template Context="data">
+                        <RadzenButton Click=@(args => ShowInlineDialog(@data.Description)) Icon="add_circle_outline" ButtonStyle="ButtonStyle.Primary" />
+                        <RadzenButton Click=@(args => OpenLink(@data.PrimaryURL)) class="rz-ml-1" Text="NVD Link" ButtonStyle="ButtonStyle.Primary" />
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+    </RadzenCard>
+
+
     <RadzenCard class="rz-mt-2">
         <RadzenButton Text="Exporter les données" Click="@DownloadJsonFile" />
     </RadzenCard>
@@ -153,35 +154,42 @@ else
             <!--var fileName = "aquasec-trivy_0.34.0-10-juillet-2023-11_20_09.json";-->
         var path = Path.Combine(Environment.ContentRootPath, Environment.EnvironmentName, fileName);
 
-        await using FileStream fs = new(path, FileMode.Open);
+        try
+        {
+            await using FileStream fs = new(path, FileMode.Open);
+            StreamReader reader = new StreamReader(fs);
+            string fileContent = await reader.ReadToEndAsync();
+            metadata = JsonSerializer.Deserialize<MetadataJson>(fileContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            broute = metadata.Results[0].Vulnerabilities.ToList();
+            ArtifactNameShow = metadata.ArtifactName;
+            VulnSeverity = new DataItem[] {
+                new DataItem
+                {
+                    Severity = "CRITIQUE",
+                    Numbers = broute.Where(l => l.Severity == "CRITICAL").Count()
+                },
+                new DataItem
+                {
+                    Severity = "HAUTE",
+                    Numbers = broute.Where(l => l.Severity == "HIGH").Count()
+                },
+                new DataItem
+                {
+                    Severity = "MOYENNE",
+                    Numbers = broute.Where(l => l.Severity == "MEDIUM").Count()
+                },
+                new DataItem
+                {
+                    Severity = "FAIBLE",
+                    Numbers = broute.Where(l => l.Severity == "LOW").Count()
+                },
+            };
+        } catch (Exception e)
+        {
+            metadata = null;
+        }
 
-        StreamReader reader = new StreamReader(fs);
-        string fileContent = await reader.ReadToEndAsync();
-        metadata = JsonSerializer.Deserialize<MetadataJson>(fileContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-        broute = metadata.Results[0].Vulnerabilities.ToList();
-        ArtifactNameShow = metadata.ArtifactName;
-        VulnSeverity = new DataItem[] {
-            new DataItem
-            {
-                Severity = "CRITIQUE",
-                Numbers = broute.Where(l => l.Severity == "CRITICAL").Count()
-            },
-            new DataItem
-            {
-                Severity = "HAUTE",
-                Numbers = broute.Where(l => l.Severity == "HIGH").Count()
-            },
-            new DataItem
-            {
-                Severity = "MOYENNE",
-                Numbers = broute.Where(l => l.Severity == "MEDIUM").Count()
-            },
-            new DataItem
-            {
-                Severity = "FAIBLE",
-                Numbers = broute.Where(l => l.Severity == "LOW").Count()
-            },
-        };
+        
     }
     
     async Task LoadData(LoadDataArgs args)

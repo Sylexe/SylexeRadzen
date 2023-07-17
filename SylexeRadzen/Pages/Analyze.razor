@@ -7,6 +7,7 @@
 @using SylexeRadzen.SQLManagement.Services;
 @using SylexeRadzen.SQLManagement.Definitions;
 @using System.Text.RegularExpressions;
+@inject DialogService DialogService
 @inject ILogger<Analyze> Logger
 @inject IWebHostEnvironment WebEnvironment
 @inject ISylexeReportsServices _sylexeService
@@ -49,6 +50,9 @@
             </RadzenColumn>
         </RadzenCard>
     </RadzenStack>
+    <div class="rz-m-12">
+        <RadzenProgressBar Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" Visible=@anabar />
+    </div>
 </RadzenCard>
 
 @code {
@@ -56,7 +60,7 @@
     private long maxFileSize = 1024 * 15;
     private int maxAllowedFiles = 3;
     private bool isLoading;
-    public string pathForDocker = "";
+    public bool anabar = false;
     public bool isWindows;
     public bool isLinux;
     public bool isMacOS;
@@ -64,6 +68,9 @@
     private String DockerScan;
     private String formattedDateTime;
     private String pathOfJson;
+    private StreamReader reader;
+    private String output;
+    public String bouh;
     
     public class Docker
     {
@@ -120,40 +127,58 @@
     {
         NotificationService.Notify(message);
     }
-    
-    void ExecTrivyScan(string InputReceived)
+
+    async Task ExecServerSideProcess(String DockerScan)
     {
+        serverSideProcess = new Process();
+        
+
+            if (isWindows)
+            {
+                serverSideProcess.StartInfo.FileName = @"C:\Program Files\Docker\Docker\resources\bin\docker.exe";
+            }
+            else if (isLinux)
+            {
+                serverSideProcess.StartInfo.FileName = @"/bin/docker";
+            }
+            else if (isMacOS)
+            {
+                serverSideProcess.StartInfo.FileName = @"/bin/docker";
+            }
+
+            var path = Path.Combine(WebEnvironment.ContentRootPath, WebEnvironment.EnvironmentName);
+            DateTime currentDateTime = DateTime.Now;
+            formattedDateTime = currentDateTime.ToString("dd-MMMM-yyyy-HH:mm:ss");
+
+            string input = (DockerScan + "-" + formattedDateTime);
+            string temp = Regex.Replace(input, @"\/", "-");
+            pathOfJson = Regex.Replace(temp, @":", "_");
+            serverSideProcess.StartInfo.Arguments = String.Format("run -v {0}:/result aquasec/trivy:0.34.0 -d image -f json -o /result/{1}.json {2}", path, pathOfJson, DockerScan);
+            serverSideProcess.EnableRaisingEvents = true;
+            serverSideProcess.StartInfo.UseShellExecute = false;
+            serverSideProcess.StartInfo.RedirectStandardOutput = true;
+            serverSideProcess.Exited += new EventHandler(myProcess_Exited);
+            serverSideProcess.Start();
+            
+            reader = serverSideProcess.StandardOutput;
+            output = reader.ReadToEnd();
+
+            bouh += output;
+
+            Console.WriteLine(bouh);
+
+            serverSideProcess.WaitForExit();
+        
+
+    }
+    
+    async Task ExecTrivyScan(string InputReceived)
+    {
+        anabar = true;
         DockerScan = InputReceived;
         ShowNotification(new NotificationMessage { Severity = NotificationSeverity.Warning, Summary = "Analyse", Detail = "Lancement de l'analyse...", Duration = 4000 });
-        
-        serverSideProcess = new Process();
-        //docker run -v C: \Users\lesgu\result:/ result aquasec / trivy:0.34.0 - d image - f json - o / result / rat.json aquasec / trivy:0.34.0
 
-        if (isWindows)
-        {
-            serverSideProcess.StartInfo.FileName = @"C:\Program Files\Docker\Docker\resources\bin\docker.exe";
-        } else if (isLinux)
-        {
-            serverSideProcess.StartInfo.FileName = @"/bin/docker";
-        } else if (isMacOS)
-        {
-            serverSideProcess.StartInfo.FileName = @"/bin/docker";
-        }
-        
-        var path = Path.Combine(WebEnvironment.ContentRootPath, WebEnvironment.EnvironmentName);
-        DateTime currentDateTime = DateTime.Now;
-        formattedDateTime = currentDateTime.ToString("dd-MMMM-yyyy-HH:mm:ss");
-        
-        string input = (DockerScan + "-" + formattedDateTime);
-        string temp = Regex.Replace(input, @"\/", "-");
-        pathOfJson = Regex.Replace(temp, @":", "_");
-        
-        serverSideProcess.StartInfo.Arguments = String.Format("run -v {0}:/result aquasec/trivy:0.34.0 -d image -f json -o /result/{1}.json {2}", path, pathOfJson, DockerScan);
-        serverSideProcess.EnableRaisingEvents = true;
-        serverSideProcess.StartInfo.UseShellExecute = true;
-        serverSideProcess.Exited += new EventHandler(myProcess_Exited);
-        serverSideProcess.Start();
-        
+        await Task.Run(() => ExecServerSideProcess(InputReceived));
     }
     
     private void myProcess_Exited(object sender, System.EventArgs e)
@@ -168,10 +193,12 @@
                 Path = pathOfJson + ".json"
             });
             _sylexeService.SetPathOfJson(pathOfJson + ".json");
+            anabar = false;
         }
         else
         {
             ShowNotification(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Erreur", Detail = "L'éxécution s'est mal déroulé, merci de vérifier Docker", Duration = 4000 });
+            anabar = false;
         }
     }
 
